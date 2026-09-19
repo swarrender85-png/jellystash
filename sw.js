@@ -1,5 +1,5 @@
-const VERSION = '1.0.0';
-const CACHE = 'plush-parade-' + VERSION;
+const VERSION = '1.1.0';
+const CACHE = 'jellystash-' + VERSION;
 
 // NOTE: do not list './' or './index.html' with a trailing-slash mismatch.
 // Cloudflare Pages canonicalises /index.html -> / with a redirect, and a
@@ -39,10 +39,9 @@ self.addEventListener('install', e => {
           // a single failed asset shouldn't block the install
         }
       }
-      // Deliberately no self.skipWaiting() here. A new build installs and
-      // then waits so the open app can show an "update available" prompt
-      // before switching over. It only activates once the page tells it
-      // to, via the SKIP_WAITING message below.
+      // Updates are forced, not offered: a new build takes over as soon as
+      // it has installed, and the page reloads onto it.
+      await self.skipWaiting();
     })
   );
 });
@@ -64,7 +63,7 @@ self.addEventListener('fetch', e => {
   const url = new URL(e.request.url);
   if (url.origin !== location.origin) return;
   // live data (sync, photos, barcode lookups) must never come from the cache
-  if (url.pathname.startsWith('/api/')) return;
+  if (url.pathname.startsWith('/api/') || url.pathname === '/version.json') return;
 
   // Navigations: network first so the newest build always wins, and
   // always redirect-stripped so Safari will accept the response.

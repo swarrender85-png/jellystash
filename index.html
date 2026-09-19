@@ -3,13 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Plush Parade</title>
-<meta name="description" content="A plush collection to show off: scan the tag, snap a photo, start the parade.">
+<title>JellyStash</title>
+<meta name="description" content="A Jellycat stash to show off: scan the tag, snap a photo, start the parade.">
 <meta name="theme-color" content="#F4EFFF">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="Plush Parade">
+<meta name="apple-mobile-web-app-title" content="JellyStash">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="icon" href="icons/icon-192.png">
@@ -225,7 +225,6 @@ textarea.input{height:auto;min-height:90px;padding:12px 14px;resize:vertical}
 .busy.open{display:grid}
 .busy .spin{width:54px;height:54px;border-radius:50%;border:6px solid var(--line);border-top-color:var(--pink);margin:0 auto 14px;animation:spin .8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
-.update{position:fixed;top:calc(var(--safe-t) + 10px);left:50%;transform:translateX(-50%);z-index:85;background:var(--ink);color:#fff;border-radius:18px;padding:8px 8px 8px 16px;display:flex;align-items:center;gap:10px;font-weight:700;box-shadow:0 8px 24px rgba(43,30,79,.3)}
 
 @media (min-width:700px){
   .grid{grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:22px 18px}
@@ -259,7 +258,7 @@ textarea.input{height:auto;min-height:90px;padding:12px 14px;resize:vertical}
   <!-- parade (owned) + wishlist share one list view -->
   <section id="vList">
     <header class="top">
-      <h1 class="brand" id="brand" aria-label="Plush Parade"></h1>
+      <h1 class="brand" id="brand" aria-label="JellyStash"></h1>
       <button class="iconbtn" id="checkTagBtn" aria-label="Check a tag in a shop" title="Check a tag"><svg><use href="#i-scan"/></svg></button>
     </header>
     <p class="sub" id="listSub"></p>
@@ -285,7 +284,7 @@ textarea.input{height:auto;min-height:90px;padding:12px 14px;resize:vertical}
     <div class="panel">
       <h4>Sync with another device</h4>
       <div id="syncSetup">
-        <p class="muted">Use the same code on a phone and an iPad and the parade stays the same on both. No account needed.</p>
+        <p class="muted">Use the same code on a phone and an iPad and the stash stays the same on both. No account needed.</p>
         <div class="row" style="margin-bottom:10px"><button class="btn small" id="syncCreate">Create a sync code</button></div>
         <div class="inline"><input class="input" id="syncEnter" placeholder="Or type a code from another device" autocapitalize="characters" autocomplete="off"><button class="btn small ink" id="syncJoin">Join</button></div>
       </div>
@@ -303,8 +302,8 @@ textarea.input{height:auto;min-height:90px;padding:12px 14px;resize:vertical}
     </div>
     <div class="panel">
       <h4>About</h4>
-      <p class="muted" style="margin-top:0">Everything is kept on this device. Barcode details come from the public <a href="https://www.upcitemdb.com/" target="_blank" rel="noopener">UPCitemdb</a> database. Plush Parade is a personal project and isn't made by, or connected to, any toy brand.</p>
-      <p class="muted small" id="versionLine"></p>
+      <p class="muted" style="margin-top:0">Everything is kept on this device. Barcode details come from the public <a href="https://www.upcitemdb.com/" target="_blank" rel="noopener">UPCitemdb</a> database. JellyStash is a personal project and isn't made by, or connected to, any toy brand.</p>
+      <div class="row" style="margin-top:4px"><span class="pill" id="versionLine"></span><button class="btn small alt" id="checkUpdateBtn">Check for updates</button></div>
     </div>
   </section>
 </main>
@@ -312,7 +311,7 @@ textarea.input{height:auto;min-height:90px;padding:12px 14px;resize:vertical}
 <button class="btn ink parade-cta hide" id="startParade"><svg><use href="#i-play"/></svg>Start the parade</button>
 
 <nav class="tabs" aria-label="Sections">
-  <button data-view="parade" aria-current="page" aria-label="Parade"><svg><use href="#i-parade"/></svg></button>
+  <button data-view="parade" aria-current="page" aria-label="Stash"><svg><use href="#i-parade"/></svg></button>
   <button data-view="wish" aria-label="Wishlist"><svg><use href="#i-star"/></svg></button>
   <button class="add" id="addBtn" aria-label="Add a plush"><svg><use href="#i-plus"/></svg></button>
   <button data-view="stats" aria-label="Stats"><svg><use href="#i-chart"/></svg></button>
@@ -357,7 +356,7 @@ textarea.input{height:auto;min-height:90px;padding:12px 14px;resize:vertical}
   <div class="form">
     <div id="formBanner" class="banner hide"></div>
     <div class="seg" role="group" aria-label="Where it goes">
-      <button type="button" data-status="parade" aria-pressed="true">In the parade</button>
+      <button type="button" data-status="parade" aria-pressed="true">In the stash</button>
       <button type="button" data-status="wish" aria-pressed="false">On the wishlist</button>
     </div>
     <div class="field">
@@ -380,7 +379,7 @@ textarea.input{height:auto;min-height:90px;padding:12px 14px;resize:vertical}
     <div class="field"><label for="fCode">Style code</label><input class="input" id="fCode" placeholder="BAS3BTR" autocapitalize="characters" autocomplete="off" spellcheck="false"><p class="hint" id="fCodeHint"></p></div>
     <div class="field"><label for="fBarcode">Barcode</label><div class="inline"><input class="input" id="fBarcode" inputmode="numeric" placeholder="670983…" autocomplete="off"><button type="button" class="btn small alt" id="fBarcodeScan" aria-label="Scan barcode"><svg><use href="#i-scan"/></svg></button></div></div>
     <div class="two">
-      <div class="field"><label for="fDate" id="fDateLabel">Joined the parade</label><input class="input" type="date" id="fDate"></div>
+      <div class="field"><label for="fDate" id="fDateLabel">Joined the stash</label><input class="input" type="date" id="fDate"></div>
       <div class="field"><label for="fPrice">Price (£)</label><input class="input" id="fPrice" inputmode="decimal" placeholder="0.00" autocomplete="off"></div>
     </div>
     <div class="field"><label for="fFrom">Where from</label><input class="input" id="fFrom" list="fromList" placeholder="Birthday present, a shop, a trip…" autocomplete="off"></div>
@@ -429,10 +428,10 @@ textarea.input{height:auto;min-height:90px;padding:12px 14px;resize:vertical}
 
 <div class="busy" id="busy"><div><div class="spin"></div><span id="busyText">Looking it up</span></div></div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
-<div class="update hide" id="update">A new version is ready <button class="btn small" id="updateBtn">Update</button></div>
+<div class="busy" id="updating" style="z-index:100"><div><div class="spin"></div><span id="updatingText">Updating JellyStash</span><p class="muted small" id="updatingSub" style="margin:6px 0 0">This only takes a moment.</p></div></div>
 <script>
 "use strict";
-const VERSION="1.0.0";
+const VERSION="1.1.0";
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const LS={get(k,d){try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}},del(k){try{localStorage.removeItem(k)}catch(e){}}};
@@ -462,7 +461,7 @@ let meetList=[], meetIdx=0, meetPhoto=0;
 
 /* ---------- IndexedDB ---------- */
 let db;
-function openDB(){return new Promise((res,rej)=>{const r=indexedDB.open("plush-parade",1);r.onupgradeneeded=()=>{r.result.createObjectStore("items",{keyPath:"id"})};r.onsuccess=()=>{db=r.result;res()};r.onerror=()=>rej(r.error)})}
+function openDB(){return new Promise((res,rej)=>{const r=indexedDB.open("jellystash",1);r.onupgradeneeded=()=>{r.result.createObjectStore("items",{keyPath:"id"})};r.onsuccess=()=>{db=r.result;res()};r.onerror=()=>rej(r.error)})}
 const store=m=>db.transaction("items",m).objectStore("items");
 const dbAll=()=>new Promise((res,rej)=>{const q=store("readonly").getAll();q.onsuccess=()=>res(q.result||[]);q.onerror=()=>rej(q.error)});
 const dbPut=i=>new Promise((res,rej)=>{const q=store("readwrite").put(i);q.onsuccess=()=>res();q.onerror=()=>rej(q.error)});
@@ -614,10 +613,10 @@ const money=n=>"£"+Number(n).toFixed(2).replace(/\.00$/,"");
 
 /* ---------- brand letters ---------- */
 (function(){
-  const h=$("#brand"); const words="Plush Parade".split(" ");
+  const h=$("#brand"); const words="JellyStash".split(" ");
   let n=0;
   h.innerHTML=words.map((w,wi)=>[...w].map(ch=>`<span aria-hidden="true" style="animation-delay:${(n++)*45}ms">${esc(ch)}</span>`).join("")+(wi<words.length-1?'<span class="gap" aria-hidden="true"></span>':"")).join("");
-  if(!sessionStorage.getItem("pp-marched")){ document.body.classList.add("march"); try{sessionStorage.setItem("pp-marched","1")}catch(e){} }
+  if(!sessionStorage.getItem("stash-marched")){ document.body.classList.add("march"); try{sessionStorage.setItem("stash-marched","1")}catch(e){} }
 })();
 
 /* ---------- list view ---------- */
@@ -673,7 +672,7 @@ function renderList(){
   const favs=all.filter(i=>i.fav).length;
   $("#listSub").textContent=isWish
     ? (all.length?`${all.length} on the wishlist`:"The wishlist")
-    : (all.length?`${all.length} friend${all.length===1?"":"s"} in the parade`+(favs?`, ${favs} favourite${favs===1?"":"s"}`:""):"Your plush collection");
+    : (all.length?`${all.length} friend${all.length===1?"":"s"} in the stash`+(favs?`, ${favs} favourite${favs===1?"":"s"}`:""):"Your plush collection");
   renderChips();
   $("#searchRow").classList.toggle("hide",all.length<4);
   $("#grid").innerHTML=list.map(cardHTML).join("");
@@ -682,7 +681,7 @@ function renderList(){
     e.classList.remove("hide");
     e.innerHTML=isWish
       ? `<div class="bun" style="background:var(--butter)"><svg width="56" height="56" style="color:var(--ink)"><use href="#i-star"/></svg></div><h2>Nothing wished for yet</h2><p>Add the ones she's hoping for, then scan tags in shops to see if you've found one.</p><div class="btnrow"><button class="btn" data-act="addwish">Add a wish</button><button class="btn alt" data-act="check">Check a tag</button></div>`
-      : `<div class="bun"><img src="icons/icon-192.png" alt=""></div><h2>The parade starts here</h2><p>Scan a tag or snap a photo to add the first friend.</p><div class="btnrow"><button class="btn" data-act="scan"><svg><use href="#i-scan"/></svg>Scan a tag</button><button class="btn alt" data-act="hand">Add by hand</button></div>`;
+      : `<div class="bun"><img src="icons/icon-192.png" alt=""></div><h2>The stash starts here</h2><p>Scan a tag or snap a photo to add the first friend.</p><div class="btnrow"><button class="btn" data-act="scan"><svg><use href="#i-scan"/></svg>Scan a tag</button><button class="btn alt" data-act="hand">Add by hand</button></div>`;
   }else if(!list.length){
     e.classList.remove("hide");
     e.innerHTML=`<h2>No one matches</h2><p>Try a different word or filter.</p><button class="btn alt" data-act="clear">Show everyone</button>`;
@@ -698,7 +697,7 @@ $("#empty").onclick=e=>{
   else if(a==="clear"){ $("#q").value=""; filter="all"; renderList() }
 };
 $("#chips").onclick=e=>{ const b=e.target.closest(".chip"); if(!b) return; filter=b.dataset.f; renderList() };
-$("#q").oninput=renderList; $("#sort").onchange=()=>{ LS.set("pp-sort",$("#sort").value); renderList() };
+$("#q").oninput=renderList; $("#sort").onchange=()=>{ LS.set("stash-sort",$("#sort").value); renderList() };
 $("#grid").onclick=e=>{ const c=e.target.closest(".card"); if(!c) return; const list=currentList(); openMeet(list,list.findIndex(i=>i.id===c.dataset.id)) };
 
 function render(){
@@ -760,11 +759,11 @@ function duplicateSheet(dups,onAddAnyway){
   const d=dups[0];
   const wish=(d.status||"parade")==="wish";
   message({
-    title:wish?"That one's on the wishlist":"Already in the parade",
+    title:wish?"That one's on the wishlist":"Already in the stash",
     lead:wish?`${d.nickname||d.name||"This friend"} is on the wishlist. Got it now?`:`${d.nickname||d.name||"This friend"} is already here${dups.length>1?` (and ${dups.length-1} more)`:""}.`,
     body:`<div style="max-width:200px;margin:0 auto 6px">${cardHTML(d).replace("<button","<div").replace(/<\/button>\s*$/,"</div>")}</div>`,
     actions:[
-      ...(wish?[{label:"Move it to the parade",run:()=>moveToParade(d)}]:[]),
+      ...(wish?[{label:"Move it to the stash",run:()=>moveToParade(d)}]:[]),
       {label:"See it",alt:!wish,ink:wish,run:()=>openMeet([d],0)},
       {label:"Add another one anyway",alt:true,run:onAddAnyway}
     ]
@@ -772,14 +771,14 @@ function duplicateSheet(dups,onAddAnyway){
 }
 async function moveToParade(i){
   i.status="parade"; i.adopted=today(); i.updated=Date.now(); await dbPut(i);
-  toast(`${i.nickname||i.name||"It"} joined the parade`); scheduleSync(); render();
+  toast(`${i.nickname||i.name||"It"} joined the stash`); scheduleSync(); render();
 }
 
 /* ---------- barcode lookup ---------- */
 async function lookupBarcode(upc){
-  const cache=LS.get("pp-upc",{});
+  const cache=LS.get("stash-upc",{});
   if(cache[upc]&&(cache[upc].found||Date.now()-(cache[upc].at||0)<3*86400000)) return cache[upc];
-  const remember=r=>{ const c=LS.get("pp-upc",{}); c[upc]={...r,at:Date.now()}; LS.set("pp-upc",c); return r };
+  const remember=r=>{ const c=LS.get("stash-upc",{}); c[upc]={...r,at:Date.now()}; LS.set("stash-upc",c); return r };
   try{
     const r=await fetch("/api/lookup?upc="+upc,{signal:AbortSignal.timeout?AbortSignal.timeout(12000):undefined});
     const j=await r.json();
@@ -841,8 +840,8 @@ function checkTag(){
     const nm=r.found?cleanTitle(r.product.title)||r.product.title:"";
     message({
       title:"Not in the collection",
-      lead:nm?`${nm} isn't in the parade or on the wishlist.`:"That barcode isn't in the parade or on the wishlist.",
-      actions:[{label:"Add it to the parade",run:()=>addFromBarcode(upc,"parade")},{label:"Add it to the wishlist",alt:true,run:()=>addFromBarcode(upc,"wish")},{label:"Close",alt:true}]
+      lead:nm?`${nm} isn't in the stash or on the wishlist.`:"That barcode isn't in the stash or on the wishlist.",
+      actions:[{label:"Add it to the stash",run:()=>addFromBarcode(upc,"parade")},{label:"Add it to the wishlist",alt:true,run:()=>addFromBarcode(upc,"wish")},{label:"Close",alt:true}]
     });
   },"Checking this tag against the collection");
 }
@@ -910,7 +909,7 @@ function openForm(item,draft,banner,warn){
 }
 function paintStatus(){
   $$("#formSheet .seg button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.status===editing.status));
-  $("#fDateLabel").textContent=editing.status==="wish"?"Wished for since":"Joined the parade";
+  $("#fDateLabel").textContent=editing.status==="wish"?"Wished for since":"Joined the stash";
 }
 $$("#formSheet .seg button").forEach(b=>b.onclick=()=>{ editing.status=b.dataset.status; if(editing.status==="parade"&&!$("#fDate").value) $("#fDate").value=today(); paintStatus() });
 function paintPhotos(){
@@ -988,7 +987,7 @@ $("#fSave").onclick=async()=>{
   if(isNew){
     if(rec.status==="wish"&&view!=="wish") view="wish";
     if(rec.status!=="wish"&&view!=="parade") view="parade";
-    toast(rec.status==="wish"?"Added to the wishlist":`${rec.nickname||rec.name||"New friend"} joined the parade`);
+    toast(rec.status==="wish"?"Added to the wishlist":`${rec.nickname||rec.name||"New friend"} joined the stash`);
   }else toast("Saved");
   render(); scheduleSync();
   if(!isNew&&$("#meet").classList.contains("open")){ const k=meetList.findIndex(i=>i.id===rec.id); if(k>-1){ meetList[k]=rec; paintMeet() } }
@@ -1034,7 +1033,7 @@ function paintMeet(){
     ${live.code?`<span class="tag">${esc(live.code)}</span>`:""}
     ${facts.length?`<div class="facts">${facts.map(([k,v])=>`<div class="fact"><b>${esc(k)}</b><span>${esc(v)}</span></div>`).join("")}</div>`:""}
     ${live.notes?`<div class="notes">${esc(live.notes)}</div>`:""}
-    ${wish?`<button class="btn wide" id="meetGotIt">We got it! Move to the parade</button>`:""}
+    ${wish?`<button class="btn wide" id="meetGotIt">We got it! Move to the stash</button>`:""}
     ${meetList.length>1?`<p class="muted" style="text-align:center;margin-top:18px">${meetIdx+1} of ${meetList.length}. Swipe for the next friend.</p>`:""}`;
   const g=$("#meetGotIt"); if(g) g.onclick=async()=>{ await moveToParade(live); closeMeet() };
 }
@@ -1076,10 +1075,10 @@ async function shareCard(i){
     while(x.measureText(title).width>W-220&&fs>54){ fs-=4; x.font=`800 ${fs}px "Baloo 2", sans-serif` }
     x.fillText(title,110,1110);
     x.font='600 40px "Baloo 2", sans-serif'; x.globalAlpha=.8;
-    const line=i.status==="wish"?"On the wishlist":(i.adopted?`In the parade since ${fmtDate(i.adopted)}`:"In the parade");
+    const line=i.status==="wish"?"On the wishlist":(i.adopted?`In the stash since ${fmtDate(i.adopted)}`:"In the stash");
     x.fillText(i.nickname&&i.name?i.name:line,110,1170);
     if(i.nickname&&i.name) x.fillText(line,110,1222);
-    x.globalAlpha=.55; x.font='700 32px "Baloo 2", sans-serif'; x.fillText("Plush Parade",110,1290);
+    x.globalAlpha=.55; x.font='700 32px "Baloo 2", sans-serif'; x.fillText("JellyStash",110,1290);
     const blob=await new Promise(r=>c.toBlob(r,"image/png"));
     busy(false);
     const file=new File([blob],(title.replace(/[^\w]+/g,"-").toLowerCase()||"friend")+".png",{type:"image/png"});
@@ -1151,7 +1150,7 @@ function renderStats(){
   const prev=[0,...steps].filter(s=>s<=own.length).pop()||0;
   const thisYear=String(new Date().getFullYear()), newThisYear=own.filter(i=>(i.adopted||"").startsWith(thisYear)).length;
   $("#vStats").innerHTML=`
-    <div class="bigstat">${own.length}</div><p>${own.length===1?"friend":"friends"} in the parade</p>
+    <div class="bigstat">${own.length}</div><p>${own.length===1?"friend":"friends"} in the stash</p>
     <div class="panel"><h4>Next milestone: ${next}</h4><div class="milestone"><i style="width:${Math.min(100,(own.length-prev)/(next-prev)*100)}%"></i></div><p class="muted" style="margin:0">${next-own.length} to go.</p></div>
     <div class="minis">
       <div class="mini"><b>${own.filter(i=>i.fav).length}</b><span>Favourites</span></div>
@@ -1159,34 +1158,34 @@ function renderStats(){
       <div class="mini"><b>${newThisYear}</b><span>New in ${thisYear}</span></div>
       <div class="mini"><b>${own.filter(i=>i.retired).length}</b><span>Retired designs</span></div>
     </div>
-    <div class="panel"><h4>Who's in the parade</h4>${barList(kinds)}</div>
+    <div class="panel"><h4>Who's in the stash</h4>${barList(kinds)}</div>
     ${Object.keys(ranges).length?`<div class="panel"><h4>Ranges</h4>${barList(ranges)}</div>`:""}
     ${Object.keys(sizes).length?`<div class="panel"><h4>Sizes</h4>${barList(sizes,SIZES)}</div>`:""}
-    ${dated.length?`<div class="panel"><h4>Longest in the parade</h4><p style="margin:0;font:700 20px var(--display)">${esc(dated[0].nickname||dated[0].name||"A friend")}</p><p class="muted" style="margin:0">Since ${fmtDate(dated[0].adopted)}</p></div>`:""}
-    ${priced?`<div class="panel"><h4>Spent on the parade</h4><p style="margin:0;font:800 34px var(--display)">${money(spent)}</p><p class="muted" style="margin:0">Across ${priced} with a price recorded.</p></div>`:""}`;
+    ${dated.length?`<div class="panel"><h4>Longest in the stash</h4><p style="margin:0;font:700 20px var(--display)">${esc(dated[0].nickname||dated[0].name||"A friend")}</p><p class="muted" style="margin:0">Since ${fmtDate(dated[0].adopted)}</p></div>`:""}
+    ${priced?`<div class="panel"><h4>Spent on the stash</h4><p style="margin:0;font:800 34px var(--display)">${money(spent)}</p><p class="muted" style="margin:0">Across ${priced} with a price recorded.</p></div>`:""}`;
 }
 
 /* ---------- sync (same model as Vanity: a shared code, R2 behind a Pages Function) ---------- */
-const getSyncCode=()=>LS.get("pp-sync-code","");
-const getTombstones=()=>LS.get("pp-tombstones",[]);
-function addTombstone(id){ const t=getTombstones(); t.push({id,deletedAt:Date.now()}); LS.set("pp-tombstones",t) }
-function removeTombstone(id){ LS.set("pp-tombstones",getTombstones().filter(t=>t.id!==id)) }
+const getSyncCode=()=>LS.get("stash-sync-code","");
+const getTombstones=()=>LS.get("stash-tombstones",[]);
+function addTombstone(id){ const t=getTombstones(); t.push({id,deletedAt:Date.now()}); LS.set("stash-tombstones",t) }
+function removeTombstone(id){ LS.set("stash-tombstones",getTombstones().filter(t=>t.id!==id)) }
 function genSyncCode(){ const a="ABCDEFGHJKMNPQRSTUVWXYZ23456789", r=new Uint8Array(8); crypto.getRandomValues(r); return [...r].map(b=>a[b%a.length]).join("") }
 let lastSyncError="";
 function paintSyncUI(){
   const code=getSyncCode();
   $("#syncSetup").classList.toggle("hide",!!code); $("#syncActive").classList.toggle("hide",!code);
-  if(code){ $("#syncCodeDisplay").textContent=code; const t=LS.get("pp-last-sync",""); $("#syncStatus").textContent=lastSyncError||(t?"Last synced "+new Date(t).toLocaleString("en-GB",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"}):"Not synced yet.") }
+  if(code){ $("#syncCodeDisplay").textContent=code; const t=LS.get("stash-last-sync",""); $("#syncStatus").textContent=lastSyncError||(t?"Last synced "+new Date(t).toLocaleString("en-GB",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"}):"Not synced yet.") }
   $("#versionLine").textContent="Version "+VERSION;
 }
-$("#syncCreate").onclick=()=>{ LS.set("pp-sync-code",genSyncCode()); paintSyncUI(); syncNow() };
-$("#syncJoin").onclick=()=>{ const c=$("#syncEnter").value.trim().toUpperCase().replace(/\s+/g,""); if(c.length<4){ toast("That code looks too short"); return } LS.set("pp-sync-code",c); $("#syncEnter").value=""; paintSyncUI(); syncNow() };
+$("#syncCreate").onclick=()=>{ LS.set("stash-sync-code",genSyncCode()); paintSyncUI(); syncNow() };
+$("#syncJoin").onclick=()=>{ const c=$("#syncEnter").value.trim().toUpperCase().replace(/\s+/g,""); if(c.length<4){ toast("That code looks too short"); return } LS.set("stash-sync-code",c); $("#syncEnter").value=""; paintSyncUI(); syncNow() };
 $("#syncNowBtn").onclick=()=>syncNow();
-$("#syncStop").onclick=()=>message({title:"Stop syncing on this device?",lead:"Everything stays here. This device just stops sharing changes.",actions:[{label:"Stop syncing",ink:true,run:()=>{ LS.del("pp-sync-code"); lastSyncError=""; paintSyncUI() }},{label:"Keep syncing",alt:true}]});
+$("#syncStop").onclick=()=>message({title:"Stop syncing on this device?",lead:"Everything stays here. This device just stops sharing changes.",actions:[{label:"Stop syncing",ink:true,run:()=>{ LS.del("stash-sync-code"); lastSyncError=""; paintSyncUI() }},{label:"Keep syncing",alt:true}]});
 let syncTimer=null;
 function scheduleSync(){ if(!getSyncCode()) return; clearTimeout(syncTimer); syncTimer=setTimeout(()=>syncNow(true),3000) }
-const uploadedSet=c=>new Set(LS.get("pp-uploaded-"+c,[]));
-const saveUploaded=(c,s)=>LS.set("pp-uploaded-"+c,[...s]);
+const uploadedSet=c=>new Set(LS.get("stash-uploaded-"+c,[]));
+const saveUploaded=(c,s)=>LS.set("stash-uploaded-"+c,[...s]);
 let syncing=false, syncAgain=false;
 async function syncNow(silent){
   const code=getSyncCode(); if(!code) return;
@@ -1215,7 +1214,7 @@ async function syncNow(silent){
     }
     for(const [id,t] of tb){ const k=items.findIndex(i=>i.id===id); if(k>-1&&(items[k].updated||0)<=(t.deletedAt||0)){ await dbDel(id); items.splice(k,1) } }
     const tombs=[...tb.values()].filter(t=>(t.deletedAt||0)>cutoff&&!items.some(i=>i.id===t.id&&(i.updated||0)>(t.deletedAt||0)));
-    LS.set("pp-tombstones",tombs);
+    LS.set("stash-tombstones",tombs);
     stage="uploading photos";
     const up=uploadedSet(code), out=[];
     for(const i of items){
@@ -1226,9 +1225,9 @@ async function syncNow(silent){
     }
     saveUploaded(code,up);
     stage="saving";
-    const put=await fetch("/api/sync?code="+encodeURIComponent(code),{method:"PUT",headers:{"content-type":"application/json"},body:JSON.stringify({app:"plush-parade",format:1,syncedAt:new Date().toISOString(),items:out,tombstones:tombs})});
+    const put=await fetch("/api/sync?code="+encodeURIComponent(code),{method:"PUT",headers:{"content-type":"application/json"},body:JSON.stringify({app:"jellystash",format:1,syncedAt:new Date().toISOString(),items:out,tombstones:tombs})});
     if(!put.ok) throw new Error("status "+put.status);
-    LS.set("pp-last-sync",new Date().toISOString()); lastSyncError="";
+    LS.set("stash-last-sync",new Date().toISOString()); lastSyncError="";
     render();
     if(!silent) toast(fails?`Synced, ${fails} photo${fails>1?"s":""} still to upload`:"Synced");
   }catch(e){
@@ -1247,10 +1246,10 @@ $("#exportBtn").onclick=async()=>{
   busy(true,"Packing the backup");
   try{
     const out=[]; for(const i of items){ const c={...i,photos:[]}; delete c.photoHashes; for(const p of photosOf(i)) c.photos.push(await blobToDataURL(p)); out.push(c) }
-    const blob=new Blob([JSON.stringify({app:"plush-parade",version:VERSION,exportedAt:new Date().toISOString(),items:out})],{type:"application/json"});
-    const name="plush-parade-backup-"+today()+".json", file=new File([blob],name,{type:"application/json"});
+    const blob=new Blob([JSON.stringify({app:"jellystash",version:VERSION,exportedAt:new Date().toISOString(),items:out})],{type:"application/json"});
+    const name="jellystash-backup-"+today()+".json", file=new File([blob],name,{type:"application/json"});
     busy(false);
-    if(navigator.canShare&&navigator.canShare({files:[file]})){ try{ await navigator.share({files:[file],title:"Plush Parade backup"}) }catch(e){} }
+    if(navigator.canShare&&navigator.canShare({files:[file]})){ try{ await navigator.share({files:[file],title:"JellyStash backup"}) }catch(e){} }
     else{ const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=name; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),4000) }
   }catch(e){ busy(false); toast("The backup couldn't be made") }
 };
@@ -1269,28 +1268,72 @@ $("#importFile").onchange=async e=>{
       await dbPut(rec); const k=items.findIndex(i=>i.id===rec.id); if(k>-1){ items[k]=rec; updated++ } else { items.push(rec); added++ }
     }
     busy(false); toast(`Restored: ${added} added, ${updated} updated`); render(); scheduleSync();
-  }catch(err){ busy(false); toast("That file isn't a Plush Parade backup") }
+  }catch(err){ busy(false); toast("That file isn't a JellyStash backup") }
 };
 
 /* ---------- boot ---------- */
 (async function(){
-  $("#sort").value=LS.get("pp-sort","new");
+  $("#sort").value=LS.get("stash-sort","new");
   try{ await openDB(); items=await dbAll() }catch(e){ toast("Storage isn't available in this browser mode") }
   render();
   if(getSyncCode()) syncNow(true);
   document.addEventListener("visibilitychange",()=>{ if(document.visibilityState==="visible"&&getSyncCode()) syncNow(true) });
   if(navigator.storage&&navigator.storage.persist) navigator.storage.persist().catch(()=>{});
 })();
-if("serviceWorker" in navigator){
-  navigator.serviceWorker.register("sw.js").then(reg=>{
-    const offer=w=>{ $("#update").classList.remove("hide"); $("#updateBtn").onclick=()=>w.postMessage("SKIP_WAITING") };
-    if(reg.waiting&&navigator.serviceWorker.controller) offer(reg.waiting);
-    reg.addEventListener("updatefound",()=>{ const w=reg.installing; if(w) w.addEventListener("statechange",()=>{ if(w.state==="installed"&&navigator.serviceWorker.controller) offer(w) }) });
-    setInterval(()=>reg.update().catch(()=>{}),60*60*1000);
-  }).catch(()=>{});
-  let reloaded=false;
-  navigator.serviceWorker.addEventListener("controllerchange",()=>{ if(!reloaded){ reloaded=true; location.reload() } });
+/* ---------- versioning and forced updates ----------
+   VERSION here, VERSION in sw.js and version.json must always match; run
+   scripts/bump-version.sh to change all three. On launch, on returning to
+   the app and every 15 minutes, the app asks the server which version is
+   live. If it's newer, the update is applied straight away, not offered. */
+function isNewer(a,b){
+  const pa=String(a).split(".").map(Number), pb=String(b).split(".").map(Number);
+  for(let k=0;k<3;k++){ const x=pa[k]||0, y=pb[k]||0; if(x!==y) return x>y }
+  return false;
 }
+// never yank the app away mid-edit: wait until no form, sheet or scanner is open
+const busyEditing=()=>openSheets.length>0||$("#scanner").classList.contains("open");
+let updatingTo=null;
+async function checkForUpdate(manual){
+  if(updatingTo) return;
+  try{
+    const r=await fetch("/version.json?t="+Date.now(),{cache:"no-store"});
+    if(!r.ok) throw new Error("status "+r.status);
+    const live=String((await r.json()).version||"");
+    if(live&&isNewer(live,VERSION)) forceUpdate(live);
+    else if(manual) toast("JellyStash is up to date ("+VERSION+")");
+  }catch(e){ if(manual) toast("Couldn't check for updates. Are you online?") }
+}
+function forceUpdate(live){
+  if(busyEditing()){ setTimeout(()=>forceUpdate(live),2000); return }
+  // guard against a reload loop while the new build is still reaching every edge server
+  const tried=LS.get("stash-update-tried",{});
+  if(tried.v===live&&Date.now()-(tried.at||0)<120000) return;
+  LS.set("stash-update-tried",{v:live,at:Date.now()});
+  updatingTo=live;
+  $("#updatingText").textContent="Updating JellyStash to "+live;
+  $("#updating").classList.add("open");
+  const hardReload=async()=>{
+    try{ const ks=await caches.keys(); await Promise.all(ks.map(k=>caches.delete(k))) }catch(e){}
+    location.reload();
+  };
+  // the new service worker takes over by itself (skipWaiting); if that hasn't
+  // happened within 6 seconds, clear the caches and reload regardless
+  setTimeout(hardReload,6000);
+  if(!("serviceWorker" in navigator)) return hardReload();
+  navigator.serviceWorker.getRegistration().then(reg=>{
+    if(!reg) return hardReload();
+    return reg.update().then(()=>{ const w=reg.waiting; if(w) w.postMessage("SKIP_WAITING") });
+  }).catch(hardReload);
+}
+$("#checkUpdateBtn").onclick=()=>checkForUpdate(true);
+if("serviceWorker" in navigator){
+  navigator.serviceWorker.register("sw.js").catch(()=>{});
+  let reloaded=false;
+  navigator.serviceWorker.addEventListener("controllerchange",()=>{ if(updatingTo&&!reloaded){ reloaded=true; location.reload() } });
+}
+checkForUpdate();
+document.addEventListener("visibilitychange",()=>{ if(document.visibilityState==="visible") checkForUpdate() });
+setInterval(()=>checkForUpdate(),15*60*1000);
 </script>
 </body>
 </html>

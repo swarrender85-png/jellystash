@@ -1,4 +1,4 @@
-# Plush Parade
+# JellyStash
 
 A mobile-first PWA for showing off a plush collection. Scan the tag, type the style code, or snap a photo; every friend gets a card tinted to its own colour, and "Start the parade" plays the whole collection as a full-screen slideshow.
 
@@ -26,12 +26,22 @@ vendor/                  ZBar WASM (LGPL-2.1+, unmodified)
 
 ## Hosting
 
-Cloudflare Pages project `plush-parade`, connected to this repo; every push to `main` deploys. R2 bucket `plush-parade-sync` is bound as `SYNC_BUCKET`.
+Cloudflare Pages project `jellystash`, connected to this repo; every push to `main` deploys. R2 bucket `jellystash-sync` is bound as `SYNC_BUCKET`.
 
 ## Limits worth knowing
 
 - UPCitemdb's free tier allows 100 lookups a day per IP. Every result is cached in R2, and if the server's allowance runs out the phone asks directly with its own allowance.
-- Bump `VERSION` in both `index.html` and `sw.js` when releasing, so installed copies show the update prompt.
+
+
+## Versions and forced updates
+
+The version lives in three places that must match: `VERSION` in `index.html`, `VERSION` in `sw.js`, and `version.json`. Change all three at once with:
+
+```
+scripts/bump-version.sh 1.2.0
+```
+
+Installed copies check `version.json` on launch, when reopened, and every 15 minutes. If a newer version is live they update immediately (waiting only until any open form or scanner is closed), then reload. The current version is shown under More.
 
 ## Third-party code
 

@@ -1,7 +1,7 @@
 {
-  "name": "Plush Parade",
-  "short_name": "Parade",
-  "description": "A plush collection to show off: scan the tag, snap a photo, start the parade.",
+  "name": "JellyStash",
+  "short_name": "JellyStash",
+  "description": "A Jellycat stash to show off: scan the tag, snap a photo, start the parade.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

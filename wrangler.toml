@@ -1,4 +1,4 @@
-name = "plush-parade"
+name = "jellystash"
 compatibility_date = "2026-09-19"
 pages_build_output_dir = "."
 
@@ -7,4 +7,4 @@ pages_build_output_dir = "."
 #  - a shared cache of barcode lookups under upc/ (functions/api/lookup.js)
 [[r2_buckets]]
 binding = "SYNC_BUCKET"
-bucket_name = "plush-parade-sync"
+bucket_name = "jellystash-sync"

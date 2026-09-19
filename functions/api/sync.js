@@ -12,7 +12,7 @@ const MIN_CODE_LENGTH = 4;
 const MAX_BODY_BYTES = 40 * 1024 * 1024; // 40MB — generous for a photo-heavy collection, not unlimited
 
 async function hashCode(code) {
-  const bytes = new TextEncoder().encode("plush-parade-sync:" + code.trim().toLowerCase());
+  const bytes = new TextEncoder().encode("jellystash-sync:" + code.trim().toLowerCase());
   const digest = await crypto.subtle.digest("SHA-256", bytes);
   return [...new Uint8Array(digest)].map(b => b.toString(16).padStart(2, "0")).join("");
 }

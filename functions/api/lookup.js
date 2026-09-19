@@ -62,7 +62,7 @@ export async function onRequestGet({ request, env }) {
   let res;
   try {
     res = await fetch(UPSTREAM + upc, {
-      headers: { accept: "application/json", "user-agent": "PlushParade/1.0 (personal collection app)" },
+      headers: { accept: "application/json", "user-agent": "JellyStash/1.0 (personal collection app)" },
       signal: AbortSignal.timeout(8000)
     });
   } catch (e) {
