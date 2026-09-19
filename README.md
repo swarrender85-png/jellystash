@@ -1,0 +1,38 @@
+# Plush Parade
+
+A mobile-first PWA for showing off a plush collection. Scan the tag, type the style code, or snap a photo; every friend gets a card tinted to its own colour, and "Start the parade" plays the whole collection as a full-screen slideshow.
+
+Works on iPhone, iPad and Android: open the site, then Add to Home Screen.
+
+## How adding works
+
+- **Scan the tag:** the camera reads the barcode (ZBar compiled to WebAssembly, since Safari has no built-in barcode detection). The barcode is checked against the collection first, then looked up in the public UPCitemdb database to fill in the name, range, kind and size.
+- **Type the style code:** the short code on the paper tag or sewn-in loop (e.g. BAS3BTR). The app decodes the prefix (BAS3 → Bashful) from a small seed list plus everything already in the collection, so it gets smarter as she adds more.
+- **Add by hand:** for tagless friends.
+
+The app never reads the Jellycat website. Its terms of use prohibit automated access and data harvesting, so product details come only from UPCitemdb and from what's typed in.
+
+## Files
+
+```
+index.html               the whole app
+sw.js                    offline service worker (never caches /api/)
+manifest.webmanifest     PWA manifest
+functions/api/lookup.js  barcode lookup via UPCitemdb, cached in R2 under upc/
+functions/api/sync.js    sync manifest per shared code
+functions/api/photo.js   content-addressed photo storage for sync
+vendor/                  ZBar WASM (LGPL-2.1+, unmodified)
+```
+
+## Hosting
+
+Cloudflare Pages project `plush-parade`, connected to this repo; every push to `main` deploys. R2 bucket `plush-parade-sync` is bound as `SYNC_BUCKET`.
+
+## Limits worth knowing
+
+- UPCitemdb's free tier allows 100 lookups a day per IP. Every result is cached in R2, and if the server's allowance runs out the phone asks directly with its own allowance.
+- Bump `VERSION` in both `index.html` and `sw.js` when releasing, so installed copies show the update prompt.
+
+## Third-party code
+
+`vendor/zbar-wasm.mjs` and `vendor/zbar.wasm` are the [@undecaf/zbar-wasm](https://github.com/undecaf/zbar-wasm) build of ZBar, used unmodified under the LGPL-2.1+ (see `vendor/zbar-wasm-LICENSE`).

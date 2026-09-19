@@ -1,0 +1,10 @@
+name = "plush-parade"
+compatibility_date = "2026-09-19"
+pages_build_output_dir = "."
+
+# One bucket does two jobs:
+#  - sync across devices (functions/api/sync.js, photo.js), keyed by a hash of the shared code
+#  - a shared cache of barcode lookups under upc/ (functions/api/lookup.js)
+[[r2_buckets]]
+binding = "SYNC_BUCKET"
+bucket_name = "plush-parade-sync"

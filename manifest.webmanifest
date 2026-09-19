@@ -1,0 +1,16 @@
+{
+  "name": "Plush Parade",
+  "short_name": "Parade",
+  "description": "A plush collection to show off: scan the tag, snap a photo, start the parade.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#F4EFFF",
+  "theme_color": "#F4EFFF",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

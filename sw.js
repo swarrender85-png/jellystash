@@ -1,0 +1,96 @@
+const VERSION = '1.0.0';
+const CACHE = 'plush-parade-' + VERSION;
+
+// NOTE: do not list './' or './index.html' with a trailing-slash mismatch.
+// Cloudflare Pages canonicalises /index.html -> / with a redirect, and a
+// redirected Response can never be returned for a navigation on iOS Safari
+// ("Response served by service worker has redirections"). We cache './'
+// only, and strip the redirect flag defensively below.
+const ASSETS = [
+  './',
+  './manifest.webmanifest',
+  './icons/icon-192.png',
+  './icons/icon-512.png',
+  './icons/apple-touch-icon.png'
+];
+// The barcode scanner is big and rarely used, so it isn't precached — but
+// once it's been fetched, the runtime cache below keeps it for offline use.
+
+// A redirected response cannot be used for a navigation. Rebuild it as a
+// plain response carrying the same body, status and headers.
+async function stripRedirect(res) {
+  if (!res || !res.redirected) return res;
+  const body = await res.blob();
+  return new Response(body, {
+    status: res.status,
+    statusText: res.statusText,
+    headers: res.headers
+  });
+}
+
+self.addEventListener('install', e => {
+  e.waitUntil(
+    caches.open(CACHE).then(async c => {
+      for (const url of ASSETS) {
+        try {
+          const res = await fetch(url, { cache: 'reload' });
+          if (res.ok) await c.put(url, await stripRedirect(res));
+        } catch (err) {
+          // a single failed asset shouldn't block the install
+        }
+      }
+      // Deliberately no self.skipWaiting() here. A new build installs and
+      // then waits so the open app can show an "update available" prompt
+      // before switching over. It only activates once the page tells it
+      // to, via the SKIP_WAITING message below.
+    })
+  );
+});
+
+self.addEventListener('message', e => {
+  if (e.data === 'SKIP_WAITING') self.skipWaiting();
+});
+
+self.addEventListener('activate', e => {
+  e.waitUntil(
+    caches.keys()
+      .then(keys => Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k))))
+      .then(() => self.clients.claim())
+  );
+});
+
+self.addEventListener('fetch', e => {
+  if (e.request.method !== 'GET') return;
+  const url = new URL(e.request.url);
+  if (url.origin !== location.origin) return;
+  // live data (sync, photos, barcode lookups) must never come from the cache
+  if (url.pathname.startsWith('/api/')) return;
+
+  // Navigations: network first so the newest build always wins, and
+  // always redirect-stripped so Safari will accept the response.
+  if (e.request.mode === 'navigate') {
+    e.respondWith((async () => {
+      try {
+        return await stripRedirect(await fetch(e.request));
+      } catch (err) {
+        return (await caches.match('./')) || (await caches.match('./index.html')) || Response.error();
+      }
+    })());
+    return;
+  }
+
+  e.respondWith((async () => {
+    const hit = await caches.match(e.request);
+    if (hit) return hit;
+    try {
+      const res = await fetch(e.request);
+      if (res.ok && !res.redirected) {
+        const copy = res.clone();
+        caches.open(CACHE).then(c => c.put(e.request, copy));
+      }
+      return res;
+    } catch (err) {
+      return (await caches.match('./')) || Response.error();
+    }
+  })());
+});
