@@ -124,6 +124,13 @@ textarea.input{height:auto;min-height:90px;padding:12px 14px;resize:vertical}
 .inline{display:flex;gap:8px}
 .inline .input{flex:1;min-width:0}
 .two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+/* iOS gives date inputs a wide built-in minimum width, which pushed the date
+   box into the price box. Let grid cells shrink and flatten the native styling. */
+.two>*{min-width:0}
+.input{min-width:0;max-width:100%;display:block}
+input.input[type="date"]{-webkit-appearance:none;appearance:none;text-align:left;line-height:46px}
+input.input[type="date"]::-webkit-date-and-time-value{text-align:left;margin:0}
+input.input[type="date"]::-webkit-calendar-picker-indicator{opacity:.6}
 .toggles{display:flex;gap:8px;flex-wrap:wrap}
 .toggle{height:42px;padding:0 14px;border-radius:999px;border:2px solid var(--line);background:var(--card);font-weight:700;color:var(--ink2);display:inline-flex;align-items:center;gap:6px}
 .toggle[aria-pressed="true"]{border-color:var(--ink);background:var(--ink);color:#fff}
@@ -431,7 +438,7 @@ textarea.input{height:auto;min-height:90px;padding:12px 14px;resize:vertical}
 <div class="busy" id="updating" style="z-index:100"><div><div class="spin"></div><span id="updatingText">Updating JellyStash</span><p class="muted small" id="updatingSub" style="margin:6px 0 0">This only takes a moment.</p></div></div>
 <script>
 "use strict";
-const VERSION="1.1.0";
+const VERSION="1.1.1";
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const LS={get(k,d){try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}},del(k){try{localStorage.removeItem(k)}catch(e){}}};
