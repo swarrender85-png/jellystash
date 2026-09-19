@@ -26,6 +26,8 @@
   color-scheme:light;
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{touch-action:manipulation}
+button,a,label,input,select,textarea,.card,.show{touch-action:manipulation}
 html,body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 var(--body)}
 body.locked{overflow:hidden}
 button,input,select,textarea{font:inherit;color:inherit}
@@ -33,7 +35,7 @@ button{cursor:pointer;border:0;background:none;padding:0}
 :focus-visible{outline:3px solid var(--sky);outline-offset:2px;border-radius:10px}
 img{display:block;max-width:100%}
 .hide{display:none!important}
-.wrap{max-width:980px;margin:0 auto;padding:calc(var(--safe-t) + 14px) 16px calc(var(--safe-b) + 170px)}
+.wrap{max-width:980px;margin:0 auto;padding:calc(var(--safe-t) + 14px) 16px calc(var(--safe-b) + 120px)}
 
 /* ---------- header ---------- */
 .top{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin:6px 2px 4px}
@@ -90,7 +92,7 @@ select.sort{height:46px;border:0;border-radius:16px;background:var(--card);paddi
 .btn svg{width:20px;height:20px}
 .btnrow{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
 
-.parade-cta{white-space:nowrap;position:fixed;left:50%;transform:translateX(-50%);bottom:calc(var(--safe-b) + 96px);z-index:5}
+.show-cta{white-space:nowrap;height:58px;font-size:18px;margin:0 0 16px}
 
 /* ---------- tab bar ---------- */
 .tabs{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(var(--safe-b) + 12px);z-index:20;display:flex;align-items:center;gap:4px;background:var(--ink);border-radius:26px;padding:6px;box-shadow:0 10px 30px rgba(43,30,79,.3)}
@@ -189,7 +191,7 @@ input.input[type="date"]::-webkit-calendar-picker-indicator{opacity:.6}
 @keyframes marchIn{from{transform:translateX(70vw) rotate(8deg)}60%{transform:translateX(-2vw) rotate(-3deg)}to{transform:none}}
 @keyframes marchOut{to{transform:translateX(-80vw) rotate(-10deg);opacity:0}}
 .show .count{position:absolute;top:calc(var(--safe-t) + 20px);left:0;right:0;text-align:center;font:700 16px var(--display);color:var(--ink);opacity:.7}
-.show .close{position:absolute;top:calc(var(--safe-t) + 10px);right:14px;z-index:2}
+.show .close{position:absolute;top:calc(var(--safe-t) + 8px);right:10px;z-index:2;width:56px;height:56px;border-radius:18px}
 .show .paused{position:absolute;bottom:calc(var(--safe-b) + 16px);left:0;right:0;text-align:center;font-weight:700;color:var(--ink);opacity:.7}
 
 /* ---------- stats ---------- */
@@ -269,6 +271,7 @@ input.input[type="date"]::-webkit-calendar-picker-indicator{opacity:.6}
       <button class="iconbtn" id="checkTagBtn" aria-label="Check a tag in a shop" title="Check a tag"><svg><use href="#i-scan"/></svg></button>
     </header>
     <p class="sub" id="listSub"></p>
+    <button class="btn ink wide show-cta hide" id="startParade"><svg><use href="#i-play"/></svg>Show the Jellies</button>
     <div class="searchrow" id="searchRow">
       <label class="search"><svg><use href="#i-search"/></svg><input id="q" type="search" placeholder="Find a friend" autocomplete="off" aria-label="Search"></label>
       <select class="sort" id="sort" aria-label="Sort">
@@ -315,7 +318,6 @@ input.input[type="date"]::-webkit-calendar-picker-indicator{opacity:.6}
   </section>
 </main>
 
-<button class="btn ink parade-cta hide" id="startParade"><svg><use href="#i-play"/></svg>Start the parade</button>
 
 <nav class="tabs" aria-label="Sections">
   <button data-view="parade" aria-current="page" aria-label="Stash"><svg><use href="#i-parade"/></svg></button>
@@ -418,9 +420,9 @@ input.input[type="date"]::-webkit-calendar-picker-indicator{opacity:.6}
 </div>
 
 <!-- the parade -->
-<div class="show" id="show" aria-label="The parade">
+<div class="show" id="show" aria-label="Show the Jellies">
   <div class="count" id="showCount"></div>
-  <button class="iconbtn close" id="showClose" aria-label="Stop the parade"><svg><use href="#i-x"/></svg></button>
+  <button class="iconbtn close" id="showClose" aria-label="Close the show"><svg><use href="#i-x"/></svg></button>
   <div class="stage" id="stage"></div>
   <div class="paused hide" id="showPaused">Paused. Tap to carry on.</div>
 </div>
@@ -438,7 +440,7 @@ input.input[type="date"]::-webkit-calendar-picker-indicator{opacity:.6}
 <div class="busy" id="updating" style="z-index:100"><div><div class="spin"></div><span id="updatingText">Updating JellyStash</span><p class="muted small" id="updatingSub" style="margin:6px 0 0">This only takes a moment.</p></div></div>
 <script>
 "use strict";
-const VERSION="1.1.1";
+const VERSION="1.1.2";
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const LS={get(k,d){try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}},del(k){try{localStorage.removeItem(k)}catch(e){}}};

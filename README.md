@@ -1,6 +1,6 @@
 # JellyStash
 
-A mobile-first PWA for showing off a plush collection. Scan the tag, type the style code, or snap a photo; every friend gets a card tinted to its own colour, and "Start the parade" plays the whole collection as a full-screen slideshow.
+A mobile-first PWA for showing off a plush collection. Scan the tag, type the style code, or snap a photo; every friend gets a card tinted to its own colour, and "Show the Jellies" plays the whole collection as a full-screen slideshow.
 
 Works on iPhone, iPad and Android: open the site, then Add to Home Screen.
 
