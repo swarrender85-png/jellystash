@@ -266,6 +266,27 @@ input.input[type="date"]::-webkit-calendar-picker-indicator{opacity:.6}
 #crop .hint{color:#fff;opacity:.8;font-weight:700;text-align:center;margin:0}
 #crop .row{gap:12px;width:min(88vw,520px)}
 #crop .row .btn{flex:1}
+/* ---------- onboarding ---------- */
+#intro{position:fixed;inset:0;z-index:95;background:var(--bg);display:none;flex-direction:column}
+#intro.open{display:flex}
+#intro .skip{position:absolute;top:calc(var(--safe-t) + 12px);right:14px;z-index:2;height:40px;padding:0 16px;border-radius:14px;font-weight:800;color:var(--ink2);background:var(--card);box-shadow:0 2px 0 var(--line)}
+#introTrack{flex:1;display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;overscroll-behavior-x:contain}
+#introTrack::-webkit-scrollbar{display:none}
+.slide-i{flex:0 0 100%;scroll-snap-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:calc(var(--safe-t) + 60px) 28px 20px}
+.slide-i .art{position:relative;width:min(70vw,300px);aspect-ratio:1;margin-bottom:28px;display:grid;place-items:center}
+.slide-i h2{font:800 clamp(32px,9vw,44px)/1 var(--display);margin:0 0 10px;letter-spacing:-.01em}
+.slide-i p{margin:0;color:var(--ink2);font-weight:600;font-size:17px;max-width:360px}
+.art .blob{position:absolute;inset:6%;border-radius:38%;transform:rotate(-6deg)}
+.art .big{position:relative;width:62%;border-radius:32px;box-shadow:0 14px 30px rgba(43,30,79,.18)}
+.art .tag{position:absolute}
+.art .ic{position:relative;width:46%;aspect-ratio:1;border-radius:30px;display:grid;place-items:center;box-shadow:0 12px 26px rgba(43,30,79,.16)}
+.art .ic svg{width:54%;height:54%}
+.art .mini{position:absolute;width:40%;aspect-ratio:1;border-radius:24px;box-shadow:0 10px 22px rgba(43,30,79,.16);display:grid;place-items:center;font:800 40px var(--display);color:rgba(43,30,79,.35)}
+.intro-foot{padding:10px 24px calc(var(--safe-b) + 22px);display:flex;flex-direction:column;align-items:center;gap:16px}
+.intro-dots{display:flex;gap:8px}
+.intro-dots i{width:9px;height:9px;border-radius:50%;background:var(--line);transition:.2s}
+.intro-dots i.on{width:26px;border-radius:9px;background:var(--pink)}
+.intro-foot .btn{width:min(100%,420px)}
 @media (min-width:700px){
   .grid{grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:22px 18px}
 }
@@ -347,7 +368,7 @@ input.input[type="date"]::-webkit-calendar-picker-indicator{opacity:.6}
     <div class="panel">
       <h4>About</h4>
       <p class="muted" style="margin-top:0">Everything is kept on this device. Barcode details come from the public <a href="https://www.upcitemdb.com/" target="_blank" rel="noopener">UPCitemdb</a> database. JellyStash is a personal project and isn't made by, or connected to, any toy brand.</p>
-      <div class="row" style="margin-top:4px"><span class="pill" id="versionLine"></span><button class="btn small alt" id="checkUpdateBtn">Check for updates</button></div>
+      <div class="row" style="margin-top:4px"><span class="pill" id="versionLine"></span><button class="btn small alt" id="introAgain">Show the intro</button><button class="btn small alt" id="checkUpdateBtn">Check for updates</button></div>
     </div>
   </section>
 </main>
@@ -494,11 +515,44 @@ input.input[type="date"]::-webkit-calendar-picker-indicator{opacity:.6}
   <div id="shareBody"></div>
 </div>
 <div class="busy" id="busy"><div><div class="spin"></div><span id="busyText">Looking it up</span></div></div>
+<div id="intro" role="dialog" aria-modal="true" aria-label="Welcome to JellyStash">
+  <button class="skip" id="introSkip">Skip</button>
+  <div id="introTrack">
+    <section class="slide-i">
+      <div class="art"><div class="blob" style="background:#FFD6E4"></div><img class="big" src="icons/icon-512.png" alt=""><span class="tag" style="left:auto;top:6%;right:2%;transform:rotate(9deg)"><i class="rib"></i><span class="tg"><b>HELLO</b></span></span></div>
+      <h2>Welcome to JellyStash</h2>
+      <p>Every Jelly in one place, ready to show off.</p>
+    </section>
+    <section class="slide-i">
+      <div class="art"><div class="blob" style="background:#FFF1C2"></div><span class="ic" style="background:var(--pink);color:#fff"><svg><use href="#i-camera"/></svg></span><span class="tag" style="top:auto;bottom:6%;left:4%;transform:rotate(-8deg)"><i class="rib"></i><span class="tg"><b><small>Bashful</small>BAS3BTR</b></span></span></div>
+      <h2>Snap the tag</h2>
+      <p>Take a photo of the paper tag and the name, style code and barcode fill themselves in.</p>
+    </section>
+    <section class="slide-i">
+      <div class="art"><div class="blob" style="background:#D8F5EC"></div>
+        <span class="mini" style="background:#FFD6E4;left:4%;top:12%;transform:rotate(-10deg)">B</span>
+        <span class="mini" style="background:#D6E6FF;right:4%;top:6%;transform:rotate(8deg)">P</span>
+        <span class="mini" style="background:#FFE9C7;left:30%;bottom:6%;transform:rotate(3deg)">C</span>
+        <span class="ic" style="background:var(--ink);color:#fff;width:34%"><svg><use href="#i-play"/></svg></span></div>
+      <h2>Show them off</h2>
+      <p>Tap Show the Jellies for a slideshow, share a card of any friend, and meet a new Jelly of the day.</p>
+    </section>
+    <section class="slide-i">
+      <div class="art"><div class="blob" style="background:#E3E9FF"></div><span class="ic" style="background:var(--butter);color:var(--ink)"><svg><use href="#i-star"/></svg></span><span class="mini" style="width:30%;right:6%;bottom:10%;background:#fff;color:var(--sky)"><svg width="46%" height="46%"><use href="#i-share"/></svg></span></div>
+      <h2>Wishes and backups</h2>
+      <p>Keep a wishlist family can see, and turn on sync under More so nothing is ever lost.</p>
+    </section>
+  </div>
+  <div class="intro-foot">
+    <div class="intro-dots" id="introDots"></div>
+    <button class="btn" id="introNext">Next</button>
+  </div>
+</div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <div class="busy" id="updating" style="z-index:100"><div><div class="spin"></div><span id="updatingText">Updating JellyStash</span><p class="muted small" id="updatingSub" style="margin:6px 0 0">This only takes a moment.</p></div></div>
 <script>
 "use strict";
-const VERSION="1.6.0";
+const VERSION="1.7.0";
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const LS={get(k,d){try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}},del(k){try{localStorage.removeItem(k)}catch(e){}}};
@@ -1765,6 +1819,29 @@ $("#importFile").onchange=async e=>{
   }catch(err){ busy(false); toast("That file isn't a JellyStash backup") }
 };
 
+/* ---------- onboarding: four swipeable slides, shown once ---------- */
+const INTRO_KEY="stash-intro-seen";
+function introIndex(){ const t=$("#introTrack"); return Math.round(t.scrollLeft/Math.max(1,t.clientWidth)) }
+function paintIntro(){
+  const n=$$("#introTrack .slide-i").length, k=introIndex();
+  $("#introDots").innerHTML=Array.from({length:n},(_,j)=>`<i class="${j===k?"on":""}"></i>`).join("");
+  $("#introNext").textContent=k===n-1?(items.length?"Let's go":"Add the first Jelly"):"Next";
+  $("#introSkip").classList.toggle("hide",k===n-1);
+}
+function openIntro(){ const t=$("#introTrack"); $("#intro").classList.add("open"); lockBody(); t.scrollLeft=0; paintIntro() }
+function closeIntro(then){
+  LS.set(INTRO_KEY,Date.now()); $("#intro").classList.remove("open"); unlockBody();
+  if(then&&!items.length) setTimeout(()=>openAdd("parade"),250);
+}
+$("#introTrack").addEventListener("scroll",()=>{ clearTimeout(paintIntro.t); paintIntro.t=setTimeout(paintIntro,60) },{passive:true});
+$("#introNext").onclick=()=>{
+  const t=$("#introTrack"), n=$$("#introTrack .slide-i").length, k=introIndex();
+  if(k>=n-1) return closeIntro(true);
+  t.scrollTo({left:(k+1)*t.clientWidth,behavior:"smooth"});
+};
+$("#introSkip").onclick=()=>closeIntro(false);
+$("#introAgain").onclick=()=>openIntro();
+
 /* ---------- photo health check ----------
    Runs at launch. Reads every photo; anything unreadable is re-downloaded from
    sync when possible, otherwise the Jelly is marked "Retake photo". Records
@@ -1803,6 +1880,7 @@ async function checkPhotos(){
   $("#sort").value=LS.get("stash-sort","new");
   try{ await openDB(); items=await dbAll() }catch(e){ toast("Storage isn't available in this browser mode") }
   render();
+  if(!LS.get(INTRO_KEY,0)) openIntro();
   await checkPhotos();
   // colour for photos saved before colour detection existed
   (async()=>{ let n=0; for(const i of items){ const p=photosOf(i)[0]; if(p&&(!i.tint||i.tint.l==null)){ try{ i.tint=sampleTint(await loadImg(blobURL(p))); await dbPut(i); n++ }catch(e){} } } if(n) render() })();
