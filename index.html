@@ -64,7 +64,8 @@ select.sort{flex:none;max-width:40%;height:46px;border:0;border-radius:16px;back
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:16px 12px}
 .card{position:relative;text-align:left;display:block;width:100%}
 .card .ph{position:relative;aspect-ratio:1;border-radius:28px;overflow:hidden;background:var(--tint,#EADFFF)}
-.card .ph img{width:100%;height:100%;object-fit:cover}
+.card .ph img{position:relative;z-index:1;width:100%;height:100%;object-fit:cover}
+.card .lost{position:absolute;right:10px;bottom:10px;z-index:2;font-size:12px;font-weight:800;background:var(--butter);color:var(--ink);border-radius:999px;padding:3px 9px}
 .card .ph .mono{position:absolute;inset:0;display:grid;place-items:center;font:800 64px/1 var(--display);color:rgba(43,30,79,.28)}
 .card .nm{font:700 19px/1.1 var(--display);margin:9px 4px 0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .card .meta{font-size:13.5px;color:var(--ink2);margin:1px 4px 0;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -485,7 +486,7 @@ input.input[type="date"]::-webkit-calendar-picker-indicator{opacity:.6}
 <div class="busy" id="updating" style="z-index:100"><div><div class="spin"></div><span id="updatingText">Updating JellyStash</span><p class="muted small" id="updatingSub" style="margin:6px 0 0">This only takes a moment.</p></div></div>
 <script>
 "use strict";
-const VERSION="1.3.0";
+const VERSION="1.3.1";
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const LS={get(k,d){try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}},del(k){try{localStorage.removeItem(k)}catch(e){}}};
@@ -517,8 +518,40 @@ let meetList=[], meetIdx=0, meetPhoto=0;
 let db;
 function openDB(){return new Promise((res,rej)=>{const r=indexedDB.open("jellystash",1);r.onupgradeneeded=()=>{r.result.createObjectStore("items",{keyPath:"id"})};r.onsuccess=()=>{db=r.result;res()};r.onerror=()=>rej(r.error)})}
 const store=m=>db.transaction("items",m).objectStore("items");
-const dbAll=()=>new Promise((res,rej)=>{const q=store("readonly").getAll();q.onsuccess=()=>res(q.result||[]);q.onerror=()=>rej(q.error)});
-const dbPut=i=>new Promise((res,rej)=>{const q=store("readwrite").put(i);q.onsuccess=()=>res();q.onerror=()=>rej(q.error)});
+/* Photos are stored as raw bytes ({t: type, d: ArrayBuffer}), not as Blobs.
+   iOS Safari keeps IndexedDB Blobs as separate files, and re-saving a record
+   that holds a Blob it handed out can leave that photo unreadable. Bytes are
+   stored inside the record itself, so that can't happen. In memory, photos
+   are still Blobs so the rest of the app is unchanged. */
+const bytesCache=new WeakMap();
+function withTimeout(p,ms){ return Promise.race([p,new Promise((_,rej)=>setTimeout(()=>rej(new Error("timeout")),ms))]) }
+async function blobBytes(b){
+  if(bytesCache.has(b)) return bytesCache.get(b);
+  const ab=await withTimeout(b.arrayBuffer?b.arrayBuffer():new Promise((res,rej)=>{const f=new FileReader();f.onload=()=>res(f.result);f.onerror=()=>rej(f.error);f.readAsArrayBuffer(b)}),8000);
+  if(!ab||!ab.byteLength) throw new Error("empty photo");
+  bytesCache.set(b,ab); return ab;
+}
+const legacyIds=new Set();
+function fromStore(r){
+  const c={...r}, ph=Array.isArray(r.photos)?r.photos:[];
+  c.photos=ph.map(p=>{
+    if(p instanceof Blob){ legacyIds.add(r.id); return p }
+    if(p&&p.d){ const b=new Blob([p.d],{type:p.t||"image/jpeg"}); bytesCache.set(b,p.d); return b }
+    return null;
+  }).filter(Boolean);
+  return c;
+}
+async function toStore(i){
+  const c={...i}; c.photos=[]; const hashes=[];
+  const ph=photosOf(i);
+  for(let k=0;k<ph.length;k++){
+    try{ c.photos.push({t:ph[k].type||"image/jpeg",d:await blobBytes(ph[k])}); hashes.push((i.photoHashes||[])[k]) }catch(e){ /* unreadable photo: leave it out */ }
+  }
+  c.photoHashes=hashes.filter(Boolean).length===c.photos.length?hashes:[];
+  return c;
+}
+const dbAll=()=>new Promise((res,rej)=>{const q=store("readonly").getAll();q.onsuccess=()=>res((q.result||[]).map(fromStore));q.onerror=()=>rej(q.error)});
+const dbPut=async i=>{ const rec=await toStore(i); return new Promise((res,rej)=>{const q=store("readwrite").put(rec);q.onsuccess=()=>res();q.onerror=()=>rej(q.error)}) };
 const dbDel=id=>new Promise((res,rej)=>{const q=store("readwrite").delete(id);q.onsuccess=()=>res();q.onerror=()=>rej(q.error)});
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,8);
 
@@ -734,7 +767,8 @@ function cardHTML(i){
   const meta=[i.size,i.range&&i.range!==(i.name||"").split(" ")[0]?i.range:"",i.kind].filter(Boolean).slice(0,2).join(", ");
   return `<button class="card" data-id="${esc(i.id)}" style="--tint:${t.soft}">
     ${i.code?`<span class="tag">${esc(i.code)}</span>`:""}
-    <div class="ph">${pic?`<img src="${esc(pic)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">`:""}${pic?"":`<span class="mono">${initial(i)}</span>`}
+    <div class="ph"><span class="mono">${initial(i)}</span>${pic?`<img src="${esc(pic)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">`:""}
+      ${i.photosLost&&!photosOf(i).length?`<span class="lost">Retake photo</span>`:""}
       ${i.fav?`<span class="fav"><svg><use href="#i-heart"/></svg></span>`:""}
       ${i.retired?`<span class="retired">Retired</span>`:""}</div>
     <div class="nm">${esc(i.nickname||i.name||"Unnamed friend")}</div>
@@ -1201,7 +1235,7 @@ $("#fPhotoInput").onchange=async e=>{
   if(!res) return;
   busy(true,"Saving the photo");
   try{
-    editing.photos.push(res.blob); editing.photoHashes.push(await hashBlob(res.blob));
+    editing.photos.push(res.blob); editing.photoHashes.push(await hashBlob(res.blob)); editing.photosLost=0;
     if(editing.photos.length===1){ editing.tint=res.tint; paintAutoColour() }
     paintPhotos();
   }catch(err){ toast("That photo couldn't be saved. Try another.") }
@@ -1343,6 +1377,7 @@ function paintMeet(){
     <div>${wish?`<span class="pill butter">On the wishlist</span>`:""}${live.fav?`<span class="pill">Favourite</span>`:""}${live.retired?`<span class="pill mint">Retired design</span>`:""}</div>
     ${live.code?`<span class="tag">${esc(live.code)}</span>`:""}
     ${facts.length?`<div class="facts">${facts.map(([k,v])=>`<div class="fact"><b>${esc(k)}</b><span>${esc(v)}</span></div>`).join("")}</div>`:""}
+    ${live.photosLost&&!photosOf(live).length?`<div class="notes">The photo of this Jelly couldn't be recovered on this device. Tap the pencil to take a new one.</div>`:""}
     ${live.notes?`<div class="notes">${esc(live.notes)}</div>`:""}
     ${wish?`<button class="btn wide" id="meetGotIt">We got it! Move to the stash</button>`:""}
     ${meetList.length>1?`<p class="muted" style="text-align:center;margin-top:18px">${meetIdx+1} of ${meetList.length}. Swipe for the next friend.</p>`:""}`;
@@ -1651,12 +1686,46 @@ $("#importFile").onchange=async e=>{
   }catch(err){ busy(false); toast("That file isn't a JellyStash backup") }
 };
 
+/* ---------- photo health check ----------
+   Runs at launch. Reads every photo; anything unreadable is re-downloaded from
+   sync when possible, otherwise the Jelly is marked "Retake photo". Records
+   still using the old Blob format are rewritten in the safe byte format. */
+async function checkPhotos(){
+  const code=getSyncCode(); let lost=0, recovered=0, changed=false;
+  for(const i of items){
+    const ph=photosOf(i); if(!ph.length&&!legacyIds.has(i.id)) continue;
+    const keep=[], keepH=[];
+    for(let k=0;k<ph.length;k++){
+      const h=(i.photoHashes||[])[k];
+      try{ await blobBytes(ph[k]); keep.push(ph[k]); keepH.push(h) }
+      catch(e){
+        let b=null;
+        if(code&&h){ try{ const r=await fetch("/api/photo?code="+encodeURIComponent(code)+"&h="+h); if(r.ok){ b=await r.blob(); await blobBytes(b) } }catch(err){ b=null } }
+        if(b){ keep.push(b); keepH.push(h); recovered++ } else lost++;
+      }
+    }
+    const dropped=ph.length-keep.length;
+    if(dropped||legacyIds.has(i.id)){
+      i.photos=keep; i.photoHashes=keepH.every(Boolean)?keepH:[];
+      if(dropped) i.photosLost=(i.photosLost||0)+dropped;
+      try{ await dbPut(i); changed=true }catch(e){}
+    }
+  }
+  legacyIds.clear();
+  if(changed) render();
+  if(lost&&!LS.get("stash-lost-told",0)){
+    LS.set("stash-lost-told",Date.now());
+    message({title:`${lost} photo${lost===1?"":"s"} couldn't be recovered`,lead:"Safari lost track of them after the last update re-saved them. Photos are now stored in a safer way, so this won't happen again. The Jellies are all still here, marked \"Retake photo\".",actions:[{label:"OK"}]});
+  }else if(recovered) toast(`Recovered ${recovered} photo${recovered===1?"":"s"} from sync`);
+}
+
 /* ---------- boot ---------- */
 (async function(){
   $("#sort").value=LS.get("stash-sort","new");
   try{ await openDB(); items=await dbAll() }catch(e){ toast("Storage isn't available in this browser mode") }
   render();
-  // one-off: older photos were saved before colour detection, so work their colour out now
+  await checkPhotos();
+  // colour for photos saved before colour detection existed
   (async()=>{ let n=0; for(const i of items){ const p=photosOf(i)[0]; if(p&&(!i.tint||i.tint.l==null)){ try{ i.tint=sampleTint(await loadImg(blobURL(p))); await dbPut(i); n++ }catch(e){} } } if(n) render() })();
   if(getSyncCode()) syncNow(true);
   document.addEventListener("visibilitychange",()=>{ if(document.visibilityState==="visible"&&getSyncCode()) syncNow(true) });
