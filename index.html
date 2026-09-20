@@ -74,9 +74,12 @@ select.sort{flex:none;max-width:40%;height:46px;border:0;border-radius:16px;back
 .card .retired{position:absolute;bottom:10px;left:10px;font-size:12px;font-weight:800;background:var(--ink);color:#fff;border-radius:999px;padding:3px 9px}
 
 /* the hang tag: the one piece of whimsy on every card */
-.tag{position:absolute;top:-6px;left:14px;z-index:2;transform:rotate(-7deg);transform-origin:50% 0;background:var(--butter);color:var(--ink);font:800 12px/1 var(--body);letter-spacing:.02em;padding:14px 9px 6px;border-radius:6px 6px 10px 10px;box-shadow:0 2px 0 rgba(43,30,79,.12)}
-.tag::before{content:"";position:absolute;top:5px;left:50%;width:6px;height:6px;margin-left:-3px;border-radius:50%;background:var(--bg);box-shadow:inset 0 0 0 1.5px rgba(43,30,79,.25)}
-.tag::after{content:"";position:absolute;top:-10px;left:50%;width:2px;height:16px;background:rgba(43,30,79,.35);border-radius:2px}
+/* the hang tag: a house-shaped card with a coloured border, hung on a ribbon */
+.tag{position:absolute;top:-8px;left:12px;z-index:2;transform:rotate(-7deg);transform-origin:50% 0;filter:drop-shadow(0 2px 1px rgba(43,30,79,.18))}
+.tag .rib{position:absolute;left:50%;top:-10px;width:5px;height:21px;margin-left:-2.5px;background:var(--pink);border-radius:3px;z-index:2}
+.tag .tg{position:relative;z-index:1;display:block;background:#4EC1C6;padding:3px;clip-path:polygon(26% 0,74% 0,100% 30%,100% 100%,0 100%,0 30%)}
+.tag .tg b{position:relative;display:block;background:#fff;padding:22px 12px 12px;font:800 12px/1 var(--body);letter-spacing:.05em;color:var(--ink);text-align:center;white-space:nowrap;clip-path:polygon(25% 0,75% 0,100% 29%,100% 100%,0 100%,0 29%)}
+.tag .tg b::before{content:"";position:absolute;top:6px;left:50%;width:7px;height:7px;margin-left:-3.5px;border-radius:50%;background:#E4E0EC;box-shadow:inset 0 1px 1px rgba(43,30,79,.3)}
 
 .empty{text-align:center;padding:40px 16px 20px;max-width:440px;margin:0 auto}
 .empty h2{font:800 30px/1.05 var(--display);margin:14px 0 8px}
@@ -167,7 +170,11 @@ input.input[type="date"]::-webkit-calendar-picker-indicator{opacity:.6}
 .meet .dots i.on{background:var(--ink)}
 .meet h2{font:800 clamp(38px,10vw,56px)/.95 var(--display);margin:20px 0 4px;letter-spacing:-.015em;color:var(--mink,var(--ink))}
 .meet .aka{font:600 20px/1.2 var(--display);color:var(--mink,var(--ink));opacity:.8;margin:0 0 14px}
-.meet .tag{position:relative;top:auto;left:auto;display:inline-block;margin:8px 0 14px 4px;font-size:14px;padding:16px 12px 8px}
+.meet .tag{position:relative;top:auto;left:auto;display:inline-block;margin:20px 0 14px 8px}
+.meet .tag .tg b{font-size:16px;padding:28px 20px 16px}
+.tag .tg b small{display:block;font:800 10.5px/1 var(--body);letter-spacing:.14em;text-transform:uppercase;color:#2FA3A8;margin:0 0 7px}
+.meet .tag .tg b::before{top:8px;width:9px;height:9px;margin-left:-4.5px}
+.meet .tag .rib{top:-14px;height:27px;width:6px;margin-left:-3px}
 .facts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:6px 0 16px}
 .fact{background:rgba(255,255,255,.72);border-radius:18px;padding:10px 14px}
 .fact b{display:block;font-size:12.5px;color:var(--ink2);font-weight:700}
@@ -490,7 +497,7 @@ input.input[type="date"]::-webkit-calendar-picker-indicator{opacity:.6}
 <div class="busy" id="updating" style="z-index:100"><div><div class="spin"></div><span id="updatingText">Updating JellyStash</span><p class="muted small" id="updatingSub" style="margin:6px 0 0">This only takes a moment.</p></div></div>
 <script>
 "use strict";
-const VERSION="1.4.2";
+const VERSION="1.5.0";
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const LS={get(k,d){try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}},del(k){try{localStorage.removeItem(k)}catch(e){}}};
@@ -626,6 +633,7 @@ function autoColour(t){
 }
 const colourOf=i=>i.colour||autoColour(i.tint);
 const swatch=c=>`<span class="sw" style="background:${COLOURS[c]||"#ccc"}"></span>`;
+const tagHTML=(code,sub)=>`<span class="tag"><i class="rib"></i><span class="tg"><b>${sub?`<small>${esc(sub)}</small>`:""}${esc(code)}</b></span></span>`;
 const photosOf=i=>Array.isArray(i.photos)?i.photos.filter(Boolean):[];
 function picOf(i){ const p=photosOf(i)[0]; if(p) return blobURL(p); return i.refImage||"" }
 const initial=i=>esc(((i.nickname||i.name||"?").trim()[0]||"?").toUpperCase());
@@ -770,7 +778,7 @@ function cardHTML(i){
   const t=tintOf(i), pic=picOf(i);
   const meta=[i.size,i.range&&i.range!==(i.name||"").split(" ")[0]?i.range:"",i.kind].filter(Boolean).slice(0,2).join(", ");
   return `<button class="card" data-id="${esc(i.id)}" style="--tint:${t.soft}">
-    ${i.code?`<span class="tag">${esc(i.code)}</span>`:""}
+    ${i.code?tagHTML(i.code):""}
     <div class="ph"><span class="mono">${initial(i)}</span>${pic?`<img src="${esc(pic)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">`:""}
       ${i.photosLost&&!photosOf(i).length?`<span class="lost">Retake photo</span>`:""}
       ${i.fav?`<span class="fav"><svg><use href="#i-heart"/></svg></span>`:""}
@@ -1114,6 +1122,12 @@ async function readTag(file){
   best.barcode=barcode||best.barcode;
   return best;
 }
+function tidyCode(code){
+  const known=prefixMap();
+  if(known[codePrefix(code)]) return code;
+  for(let k=1;k<=3&&k<code.length-2;k++){ const rest=code.slice(k); if(known[codePrefix(rest)]&&/^[A-Z]+\d+[A-Z]+$/.test(rest)) return rest }
+  return code;
+}
 async function snapToAdd(file,status){
   busy(true,"Getting the tag reader ready");
   let t;
@@ -1128,6 +1142,7 @@ async function snapToAdd(file,status){
     if(t.barcode){ busy(true,"Looking up the barcode"); look=await lookupBarcode(t.barcode) }
     busy(false);
     const fromDb=look&&look.found&&look.product?draftFromProduct(look.product,t.barcode):{};
+    if(t.code) t.code=tidyCode(t.code);
     const dec=t.code?decodeCode(t.code):null;
     const name=t.name||fromDb.name||"";
     const draft={
@@ -1418,7 +1433,7 @@ function paintMeet(){
     <h2>${esc(live.nickname||live.name||"Unnamed friend")}</h2>
     ${live.nickname&&live.name?`<p class="aka">${esc(live.name)}</p>`:""}
     <div>${wish?`<span class="pill butter">On the wishlist</span>`:""}${live.fav?`<span class="pill">Favourite</span>`:""}${live.retired?`<span class="pill mint">Retired design</span>`:""}</div>
-    ${live.code?`<span class="tag">${esc(live.code)}</span>`:""}
+    ${live.code?tagHTML(live.code,live.range):""}
     ${facts.length?`<div class="facts">${facts.map(([k,v])=>`<div class="fact"><b>${esc(k)}</b><span>${esc(v)}</span></div>`).join("")}</div>`:""}
     ${live.photosLost&&!photosOf(live).length?`<div class="notes">The photo of this Jelly couldn't be recovered on this device. Tap the pencil to take a new one.</div>`:""}
     ${live.notes?`<div class="notes">${esc(live.notes)}</div>`:""}

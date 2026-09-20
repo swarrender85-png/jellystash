@@ -29,8 +29,12 @@ h1{font:800 clamp(36px,10vw,56px)/.95 var(--display);margin:4px 0 8px;letter-spa
 .item.taken .ph img,.item.taken .ph .mono{filter:grayscale(.8) opacity(.55)}
 .badge{position:absolute;left:10px;bottom:10px;right:10px;text-align:center;font-weight:800;font-size:13px;border-radius:12px;padding:6px 8px;background:var(--ink);color:#fff}
 .badge.mine{background:var(--mint);color:var(--ink)}
-.tag{position:absolute;top:-6px;left:14px;z-index:2;transform:rotate(-7deg);background:var(--butter);font:800 12px/1 var(--body);padding:14px 9px 6px;border-radius:6px 6px 10px 10px}
-.tag::before{content:"";position:absolute;top:5px;left:50%;width:6px;height:6px;margin-left:-3px;border-radius:50%;background:var(--bg)}
+/* the hang tag: a house-shaped card with a coloured border, hung on a ribbon */
+.tag{position:absolute;top:-8px;left:12px;z-index:2;transform:rotate(-7deg);transform-origin:50% 0;filter:drop-shadow(0 2px 1px rgba(43,30,79,.18))}
+.tag .rib{position:absolute;left:50%;top:-10px;width:5px;height:21px;margin-left:-2.5px;background:#FF4F8B;border-radius:3px;z-index:2}
+.tag .tg{position:relative;z-index:1;display:block;background:#4EC1C6;padding:3px;clip-path:polygon(26% 0,74% 0,100% 30%,100% 100%,0 100%,0 30%)}
+.tag .tg b{position:relative;display:block;background:#fff;padding:22px 12px 12px;font:800 12px/1 ui-rounded,system-ui,sans-serif;letter-spacing:.05em;color:#2B1E4F;text-align:center;white-space:nowrap;clip-path:polygon(25% 0,75% 0,100% 29%,100% 100%,0 100%,0 29%)}
+.tag .tg b::before{content:"";position:absolute;top:6px;left:50%;width:7px;height:7px;margin-left:-3.5px;border-radius:50%;background:#E4E0EC;box-shadow:inset 0 1px 1px rgba(43,30,79,.3)}
 .item{position:relative}
 .nm{font:700 19px/1.1 var(--display);margin:9px 4px 0}
 .meta{font-size:13.5px;color:var(--ink2);font-weight:600;margin:1px 4px 8px}
@@ -99,7 +103,7 @@ function render(){
     const pic=i.thumb||i.ref;
     const meta=[i.size,i.range&&!(i.name||"").startsWith(i.range)?i.range:""].filter(Boolean).join(", ");
     return `<div class="item${r?" taken":""}">
-      ${i.code?`<span class="tag">${esc(i.code)}</span>`:""}
+      ${i.code?`<span class="tag"><i class="rib"></i><span class="tg"><b>${esc(i.code)}</b></span></span>`:""}
       <div class="ph">${pic?`<img src="${esc(pic)}" alt="" referrerpolicy="no-referrer" loading="lazy">`:`<span class="mono">${esc((i.name||"?")[0].toUpperCase())}</span>`}
         ${r?`<span class="badge${mine?" mine":""}">${mine?"You're getting this":(r.by?esc(r.by)+" is getting this":"Someone's getting this")}</span>`:""}</div>
       <div class="nm">${esc(i.name||"A Jelly")}</div>
