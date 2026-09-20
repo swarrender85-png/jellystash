@@ -111,7 +111,7 @@ select.sort{flex:none;max-width:40%;height:46px;border:0;border-radius:16px;back
 .sheet .grab{width:44px;height:5px;border-radius:5px;background:var(--line);margin:0 auto 12px}
 .sheet h3{font:800 26px/1.1 var(--display);margin:4px 0 6px}
 .sheet p.lead{color:var(--ink2);margin:0 0 16px}
-.choice{display:flex;align-items:center;gap:14px;width:100%;text-align:left;background:var(--card);border-radius:20px;padding:14px;margin-bottom:10px;box-shadow:0 3px 0 var(--line)}
+.choice{color:var(--ink);display:flex;align-items:center;gap:14px;width:100%;text-align:left;background:var(--card);border-radius:20px;padding:14px;margin-bottom:10px;box-shadow:0 3px 0 var(--line)}
 .choice .ic{width:52px;height:52px;border-radius:16px;display:grid;place-items:center;flex:none}
 .choice .ic svg{width:26px;height:26px}
 .choice b{display:block;font:700 19px/1.15 var(--display)}
@@ -284,6 +284,7 @@ input.input[type="date"]::-webkit-calendar-picker-indicator{opacity:.6}
   <symbol id="i-share" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 8l5-5 5 5"/><path d="M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/></symbol>
   <symbol id="i-play" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13a1 1 0 0 0 1.5.9l10.4-6.5a1 1 0 0 0 0-1.8L9.5 4.6A1 1 0 0 0 8 5.5z"/></symbol>
   <symbol id="i-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></symbol>
+  <symbol id="i-gallery" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="3"/><circle cx="9" cy="10" r="1.8"/><path d="m4 18 5-5 3 3 3-3 5 5"/></symbol>
   <symbol id="i-camera" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></symbol>
 </svg>
 
@@ -362,6 +363,8 @@ input.input[type="date"]::-webkit-calendar-picker-indicator{opacity:.6}
   <p class="lead" id="addLead">Scanning the tag fills most of it in for you.</p>
   <button class="choice" id="addSnap"><span class="ic" style="background:var(--pink);color:#fff"><svg><use href="#i-camera"/></svg></span><span><b>Snap the tag</b><span>Photo of the paper tag. Reads the name, style code and barcode</span></span></button>
   <input type="file" id="snapInput" accept="image/*" capture="environment" class="hide">
+  <input type="file" id="snapPick" accept="image/*" class="hide">
+  <button class="choice" id="addSnapPick" style="padding:10px 14px"><span class="ic" style="background:var(--card);box-shadow:inset 0 0 0 2px var(--line);width:44px;height:44px"><svg><use href="#i-gallery"/></svg></span><span><b style="font-size:17px">Use a photo of the tag</b><span>Already snapped it? Pick it from the phone</span></span></button>
   <button class="choice" id="addScan"><span class="ic" style="background:var(--sky);color:var(--ink)"><svg><use href="#i-scan"/></svg></span><span><b>Scan the barcode</b><span>Point the camera at the barcode for a quick lookup</span></span></button>
   <button class="choice" id="addCode"><span class="ic" style="background:var(--butter)"><svg><use href="#i-tag"/></svg></span><span><b>Type the style code</b><span>The short code on the tag or the sewn-in loop, like BAS3BTR</span></span></button>
   <button class="choice" id="addHand"><span class="ic" style="background:var(--mint)"><svg><use href="#i-pencil"/></svg></span><span><b>Add by hand</b><span>No tag? Snap a photo and give it a name</span></span></button>
@@ -399,7 +402,8 @@ input.input[type="date"]::-webkit-calendar-picker-indicator{opacity:.6}
     <div class="field">
       <label>Photos</label>
       <div class="photos" id="fPhotos"></div>
-      <input type="file" id="fPhotoInput" accept="image/*" class="hide">
+      <input type="file" id="fPhotoInput" accept="image/*" capture="environment" class="hide">
+      <input type="file" id="fPhotoPick" accept="image/*" multiple class="hide">
     </div>
     <div class="field"><label for="fName">Name</label><input class="input" id="fName" placeholder="Bashful Truffle Bunny" autocomplete="off"></div>
     <div class="field"><label for="fNick">Nickname</label><input class="input" id="fNick" placeholder="What she calls it" autocomplete="off"></div>
@@ -486,7 +490,7 @@ input.input[type="date"]::-webkit-calendar-picker-indicator{opacity:.6}
 <div class="busy" id="updating" style="z-index:100"><div><div class="spin"></div><span id="updatingText">Updating JellyStash</span><p class="muted small" id="updatingSub" style="margin:6px 0 0">This only takes a moment.</p></div></div>
 <script>
 "use strict";
-const VERSION="1.3.1";
+const VERSION="1.4.0";
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const LS={get(k,d){try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}},del(k){try{localStorage.removeItem(k)}catch(e){}}};
@@ -709,7 +713,7 @@ function message({title,lead,body,actions}){
   const a=$("#msgActions"); a.innerHTML="";
   (actions||[{label:"OK"}]).forEach(x=>{
     const b=document.createElement("button"); b.className="btn wide"+(x.alt?" alt":"")+(x.ink?" ink":""); b.textContent=x.label;
-    b.onclick=()=>{ hideSheet(); if(x.run) setTimeout(x.run,60) }; a.appendChild(b);
+    b.onclick=()=>{ hideSheet(); if(x.run){ if(x.now) x.run(); else setTimeout(x.run,60) } }; a.appendChild(b);
   });
   showSheet("#msgSheet");
 }
@@ -896,6 +900,8 @@ $("#addBtn").onclick=()=>openAdd();
 $("#addScan").onclick=()=>{ hideSheet(); scanToAdd(addStatus) };
 $("#addSnap").onclick=()=>{ $("#snapInput").value=""; $("#snapInput").click() };
 $("#snapInput").onchange=e=>{ const f=e.target.files&&e.target.files[0]; if(!f) return; hideSheet(); snapToAdd(f,addStatus) };
+$("#addSnapPick").onclick=()=>{ $("#snapPick").value=""; $("#snapPick").click() };
+$("#snapPick").onchange=e=>{ const f=e.target.files&&e.target.files[0]; if(!f) return; hideSheet(); snapToAdd(f,addStatus) };
 $("#addCode").onclick=()=>{ hideSheet(); $("#codeInput").value=""; $("#codeHint").textContent=""; showSheet("#codeSheet"); setTimeout(()=>$("#codeInput").focus(),300) };
 $("#addHand").onclick=()=>{ hideSheet(); openForm(null,{status:addStatus}) };
 $("#codeInput").oninput=()=>{
@@ -1095,7 +1101,7 @@ async function snapToAdd(file,status){
   try{ t=await readTag(file) }catch(e){ busy(false); toast("The tag reader didn't load. Check the connection."); return }
   if(!t.name&&!t.code&&!t.barcode){
     busy(false);
-    message({title:"Couldn't read that tag",lead:"Try again with the tag flat, filling most of the photo, in good light.",actions:[{label:"Try again",run:()=>{ $("#snapInput").value=""; $("#snapInput").click() }},{label:"Scan the barcode instead",alt:true,run:()=>scanToAdd(status)},{label:"Close",alt:true}]});
+    message({title:"Couldn't read that tag",lead:"Try again with the tag flat, filling most of the photo, in good light.",actions:[{label:"Try again",now:true,run:()=>{ $("#snapInput").value=""; $("#snapInput").click() }},{label:"Choose a photo of the tag",alt:true,now:true,run:()=>{ $("#snapPick").value=""; $("#snapPick").click() }},{label:"Scan the barcode instead",alt:true,run:()=>scanToAdd(status)},{label:"Close",alt:true}]});
     return;
   }
   const go=async()=>{
@@ -1220,27 +1226,35 @@ function paintPhotos(){
   const ph=editing.photos;
   let h=ph.map((p,k)=>`<div class="slot filled"><img src="${blobURL(p)}" alt=""><button class="x" data-rm="${k}" aria-label="Remove photo">×</button></div>`).join("");
   if(!ph.length&&editing.refImage) h+=`<div class="slot filled"><img src="${esc(editing.refImage)}" alt="" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"><span class="ref">Shop picture</span><button class="x" data-rmref="1" aria-label="Remove shop picture">×</button></div>`;
-  if(ph.length<4) h+=`<button type="button" class="slot" id="addPhoto"><span><svg width="28" height="28"><use href="#i-camera"/></svg><br>${ph.length?"Add another":"Take a photo"}</span></button>`;
+  if(ph.length<4) h+=`<button type="button" class="slot" id="addPhoto"><span><svg width="28" height="28"><use href="#i-camera"/></svg><br>Take a photo</span></button><button type="button" class="slot" id="pickPhoto"><span><svg width="28" height="28"><use href="#i-gallery"/></svg><br>Choose from photos</span></button>`;
   $("#fPhotos").innerHTML=h;
 }
 $("#fPhotos").onclick=e=>{
   if(e.target.closest("#addPhoto")){ $("#fPhotoInput").value=""; $("#fPhotoInput").click(); return }
+  if(e.target.closest("#pickPhoto")){ $("#fPhotoPick").value=""; $("#fPhotoPick").click(); return }
   const rm=e.target.closest("[data-rm]"); if(rm){ const k=+rm.dataset.rm; editing.photos.splice(k,1); editing.photoHashes.splice(k,1); if(k===0) editing.tint=null; paintPhotos(); return }
   if(e.target.closest("[data-rmref]")){ editing.refImage=""; paintPhotos() }
 };
-$("#fPhotoInput").onchange=async e=>{
-  const f=e.target.files&&e.target.files[0]; if(!f) return;
-  let res;
-  try{ res=await cropPhoto(f) }catch(err){ toast("That photo couldn't be read. Try another."); return }
-  if(!res) return;
-  busy(true,"Saving the photo");
-  try{
-    editing.photos.push(res.blob); editing.photoHashes.push(await hashBlob(res.blob)); editing.photosLost=0;
-    if(editing.photos.length===1){ editing.tint=res.tint; paintAutoColour() }
-    paintPhotos();
-  }catch(err){ toast("That photo couldn't be saved. Try another.") }
-  busy(false);
-};
+// camera gives one photo; the library can give several, each gets its own crop
+async function addPhotoFiles(files){
+  const room=4-editing.photos.length;
+  const list=[...(files||[])].filter(f=>/^image\//.test(f.type)||/\.(jpe?g|png|heic|heif|webp)$/i.test(f.name||"")).slice(0,Math.max(0,room));
+  if(files&&files.length>room) toast(`Only ${room} more photo${room===1?"":"s"} fit, so the first ${room} were used`);
+  for(const f of list){
+    let res;
+    try{ res=await cropPhoto(f) }catch(err){ toast("That photo couldn't be read. Try another."); continue }
+    if(!res) continue;   // cancelled this one, carry on with the rest
+    busy(true,"Saving the photo");
+    try{
+      editing.photos.push(res.blob); editing.photoHashes.push(await hashBlob(res.blob)); editing.photosLost=0;
+      if(editing.photos.length===1){ editing.tint=res.tint; paintAutoColour() }
+      paintPhotos();
+    }catch(err){ toast("That photo couldn't be saved. Try another.") }
+    busy(false);
+  }
+}
+$("#fPhotoInput").onchange=e=>addPhotoFiles(e.target.files);
+$("#fPhotoPick").onchange=e=>addPhotoFiles(e.target.files);
 /* square crop: drag to move, pinch (or scroll) to zoom */
 function cropPhoto(file){
   return new Promise(async(resolve,reject)=>{
