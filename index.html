@@ -287,6 +287,53 @@ input.input[type="date"]::-webkit-calendar-picker-indicator{opacity:.6}
 .intro-dots i{width:9px;height:9px;border-radius:50%;background:var(--line);transition:.2s}
 .intro-dots i.on{width:26px;border-radius:9px;background:var(--pink)}
 .intro-foot .btn{width:min(100%,420px)}
+/* ---------- the Jelly wall ---------- */
+.cta-row{display:flex;gap:10px;margin:0 0 16px}
+.cta-row .btn{flex:1;height:52px;font-size:16px;padding:0 10px}
+#wall,#play{position:fixed;inset:0;z-index:55;background:var(--bg);display:none;flex-direction:column}
+#wall.open,#play.open{display:flex}
+.ovbar{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:calc(var(--safe-t) + 10px) 14px 8px}
+.ovbar h2{font:800 24px/1 var(--display);margin:0;flex:1;text-align:center}
+.ovbody{flex:1;overflow:auto;padding:4px 14px calc(var(--safe-b) + 24px);-webkit-overflow-scrolling:touch}
+.shelf{margin:0 0 26px}
+.shelf .row{display:flex;align-items:flex-end;justify-content:center;gap:10px;min-height:96px}
+.shelf .plank{height:12px;border-radius:0 0 8px 8px;background:linear-gradient(#E8DCC8,#D6C4A8);box-shadow:0 4px 8px rgba(43,30,79,.14)}
+.wtile{position:relative;flex:1 1 0;max-width:150px;text-align:center;touch-action:none}
+.wtile .pic{width:100%;aspect-ratio:1;border-radius:18px;overflow:hidden;background:var(--tint,#EADFFF);display:grid;place-items:center;font:800 32px var(--display);color:rgba(43,30,79,.3);transform-origin:50% 100%}
+.wtile .pic img{width:100%;height:100%;object-fit:cover}
+.wtile .nm{font-size:11.5px;font-weight:700;margin-top:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--ink2)}
+.wtile.drag{opacity:.25}
+.wtile.gap{opacity:.35}
+#dragGhost{position:fixed;z-index:60;pointer-events:none;width:120px;transform:translate(-50%,-50%) rotate(-4deg) scale(1.08);filter:drop-shadow(0 12px 20px rgba(43,30,79,.35))}
+#dragGhost .pic{border-radius:18px;overflow:hidden;aspect-ratio:1;background:#EADFFF}
+#dragGhost img{width:100%;height:100%;object-fit:cover;display:block}
+.wallhint{text-align:center;color:var(--ink2);font-weight:600;font-size:14px;margin:0 0 14px}
+
+/* ---------- games ---------- */
+.playmenu{display:grid;gap:14px;max-width:460px;margin:10px auto}
+.gcard{display:flex;align-items:center;gap:14px;text-align:left;background:var(--card);border-radius:24px;padding:16px;box-shadow:0 4px 0 var(--line);width:100%}
+.gcard .ic{width:60px;height:60px;border-radius:20px;display:grid;place-items:center;flex:none;font-size:30px}
+.gcard b{display:block;font:800 21px/1.1 var(--display)}
+.gcard span{color:var(--ink2);font-size:14.5px;font-weight:600}
+.guess{max-width:460px;margin:0 auto;text-align:center}
+.guess .crop{width:min(72vw,300px);aspect-ratio:1;margin:0 auto 18px;border-radius:28px;overflow:hidden;background:var(--card);box-shadow:0 8px 24px rgba(43,30,79,.18)}
+.guess .crop canvas,.guess .crop img{width:100%;height:100%;object-fit:cover;display:block}
+.guess .opts{display:grid;gap:10px;margin-top:8px}
+.guess .opts .btn{width:100%;background:var(--card);color:var(--ink);box-shadow:0 4px 0 var(--line);height:56px}
+.guess .opts .btn.right{background:var(--mint);color:var(--ink);box-shadow:0 4px 0 #46B79A}
+.guess .opts .btn.wrong{background:#FFD1DE;color:var(--ink);box-shadow:0 4px 0 #E8A9BD}
+.scoreline{font:800 18px var(--display);margin:0 0 12px}
+.mgrid{display:grid;gap:10px;max-width:460px;margin:0 auto}
+.mcard{aspect-ratio:1;border-radius:18px;background:var(--ink);position:relative;perspective:700px}
+.mcard .inner{position:absolute;inset:0;transition:transform .35s;transform-style:preserve-3d}
+.mcard.up .inner,.mcard.done .inner{transform:rotateY(180deg)}
+.mcard .face{position:absolute;inset:0;border-radius:18px;overflow:hidden;backface-visibility:hidden;display:grid;place-items:center}
+.mcard .back{background:var(--ink);color:rgba(255,255,255,.5);font:800 26px var(--display)}
+.mcard .front{transform:rotateY(180deg);background:var(--tint,#EADFFF)}
+.mcard .front img{width:100%;height:100%;object-fit:cover}
+.mcard.done{opacity:.55}
+.gend{text-align:center;max-width:420px;margin:20px auto}
+.gend h3{font:800 30px/1.05 var(--display);margin:0 0 8px}
 @media (min-width:700px){
   .grid{grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:22px 18px}
 }
@@ -327,6 +374,7 @@ input.input[type="date"]::-webkit-calendar-picker-indicator{opacity:.6}
     <div id="nudges"></div>
     <div id="spotlight"></div>
     <button class="btn ink wide show-cta hide" id="startParade"><svg><use href="#i-play"/></svg>Show the Jellies</button>
+    <div class="cta-row hide" id="ctaRow"><button class="btn alt" id="openWall">Jelly wall</button><button class="btn alt" id="openPlay">Play</button></div>
     <div class="searchrow" id="searchRow">
       <label class="search"><svg><use href="#i-search"/></svg><input id="q" type="search" placeholder="Find a friend" autocomplete="off" aria-label="Search"></label>
       <select class="sort" id="sort" aria-label="Sort">
@@ -548,11 +596,27 @@ input.input[type="date"]::-webkit-calendar-picker-indicator{opacity:.6}
     <button class="btn" id="introNext">Next</button>
   </div>
 </div>
+<div id="wall" role="dialog" aria-modal="true" aria-label="Jelly wall">
+  <div class="ovbar">
+    <button class="iconbtn" id="wallClose" aria-label="Close"><svg><use href="#i-back"/></svg></button>
+    <h2>Jelly wall</h2>
+    <button class="iconbtn" id="wallPoster" aria-label="Save as a poster"><svg><use href="#i-share"/></svg></button>
+  </div>
+  <div class="ovbody"><p class="wallhint">Hold a Jelly and drag to move it along the shelves.</p><div id="wallStage"></div></div>
+</div>
+<div id="play" role="dialog" aria-modal="true" aria-label="Games">
+  <div class="ovbar">
+    <button class="iconbtn" id="playClose" aria-label="Close"><svg><use href="#i-back"/></svg></button>
+    <h2 id="playTitle">Play</h2>
+    <span style="width:44px"></span>
+  </div>
+  <div class="ovbody" id="playBody"></div>
+</div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <div class="busy" id="updating" style="z-index:100"><div><div class="spin"></div><span id="updatingText">Updating JellyStash</span><p class="muted small" id="updatingSub" style="margin:6px 0 0">This only takes a moment.</p></div></div>
 <script>
 "use strict";
-const VERSION="1.7.0";
+const VERSION="1.8.0";
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const LS={get(k,d){try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}},del(k){try{localStorage.removeItem(k)}catch(e){}}};
@@ -855,6 +919,214 @@ function stashCountText(all){
   const f=n=>`${n} friend${n===1?"":"s"}`, p=n=>`${n} pin badge${n===1?"":"s"}`;
   return (pins&&rest?`${f(rest)} and ${p(pins)}`:pins?p(pins):f(rest))+" in the stash";
 }
+/* ---------- the Jelly wall ----------
+   Shelves of every Jelly in the stash, in an order she sets by dragging.
+   The order is a number per Jelly, so moving one only changes that one. */
+const wallOrder=i=>(typeof i.order==="number"?i.order:(i.created||0));
+const wallList=()=>listOf("parade").slice().sort((a,b)=>wallOrder(a)-wallOrder(b)||(a.created||0)-(b.created||0));
+const sizeScale=i=>({Tiny:.66,Mini:.7,"Bag charm":.68,Little:.78,Small:.82,Original:1,Medium:1,Large:1.1,Big:1.14,Huge:1.24,"Really Big":1.3,Giant:1.34}[i.size]||.94);
+function renderWall(){
+  const list=wallList(), perRow=window.innerWidth>700?5:3, stage=$("#wallStage");
+  let h="";
+  for(let k=0;k<list.length;k+=perRow){
+    const row=list.slice(k,k+perRow);
+    h+=`<div class="shelf"><div class="row">${row.map(i=>{
+      const t=tintOf(i), p=picOf(i);
+      return `<div class="wtile" data-id="${esc(i.id)}"><div class="pic" style="--tint:${t.soft};transform:scale(${sizeScale(i).toFixed(2)})">${p?`<img src="${esc(p)}" alt="" referrerpolicy="no-referrer">`:esc(initial(i))}</div><div class="nm">${esc(i.nickname||i.name||"")}</div></div>`;
+    }).join("")}${Array.from({length:perRow-row.length},()=>'<div class="wtile" style="visibility:hidden"></div>').join("")}</div><div class="plank"></div></div>`;
+  }
+  stage.innerHTML=h||`<p class="wallhint">Add a Jelly and it appears on the shelf.</p>`;
+}
+function openWall(){ renderWall(); $("#wall").classList.add("open"); lockBody() }
+function closeWall(){ $("#wall").classList.remove("open"); unlockBody() }
+$("#openWall").onclick=openWall; $("#wallClose").onclick=closeWall;
+// drag to reorder: press, move, drop into the nearest place
+(function(){
+  let drag=null, ghost=null, holdT=null;
+  const tiles=()=>[...$("#wallStage").querySelectorAll(".wtile[data-id]")];
+  const start=(el,x,y)=>{
+    drag={id:el.dataset.id,el};
+    el.classList.add("drag");
+    ghost=document.createElement("div"); ghost.id="dragGhost";
+    ghost.innerHTML=`<div class="pic">${el.querySelector(".pic").innerHTML}</div>`;
+    ghost.style.background="transparent"; document.body.appendChild(ghost); move(x,y);
+    if(navigator.vibrate) navigator.vibrate(15);
+  };
+  const move=(x,y)=>{ if(ghost){ ghost.style.left=x+"px"; ghost.style.top=y+"px" } };
+  const nearest=(x,y)=>{
+    let best=null,bd=1e9;
+    for(const t of tiles()){ if(t===drag.el) continue; const r=t.getBoundingClientRect(); const d=Math.hypot(x-(r.left+r.width/2),y-(r.top+r.height/2)); if(d<bd){ bd=d; best=t } }
+    return best;
+  };
+  $("#wallStage").addEventListener("pointerdown",e=>{
+    const el=e.target.closest(".wtile[data-id]"); if(!el) return;
+    const x=e.clientX,y=e.clientY;
+    holdT=setTimeout(()=>{ holdT=null; start(el,x,y) },180);
+    const cancel=()=>{ if(holdT){ clearTimeout(holdT); holdT=null } };
+    el.setPointerCapture(e.pointerId);
+    const onMove=ev=>{ if(holdT&&Math.hypot(ev.clientX-x,ev.clientY-y)>12) cancel(); if(drag){ ev.preventDefault(); move(ev.clientX,ev.clientY) } };
+    const onUp=async ev=>{
+      el.removeEventListener("pointermove",onMove); el.removeEventListener("pointerup",onUp); el.removeEventListener("pointercancel",onUp);
+      cancel();
+      if(!drag){ // a tap: open the Jelly
+        const i=items.find(x=>x.id===el.dataset.id); if(i){ const l=wallList(); openMeet(l,l.findIndex(z=>z.id===i.id)) }
+        return;
+      }
+      const target=nearest(ev.clientX,ev.clientY);
+      if(ghost){ ghost.remove(); ghost=null }
+      el.classList.remove("drag");
+      if(target){
+        const list=wallList(), moved=items.find(z=>z.id===drag.id);
+        const from=list.findIndex(z=>z.id===drag.id), to=list.findIndex(z=>z.id===target.dataset.id);
+        const before=to>from?list[to]:list[to-1], after=to>from?list[to+1]:list[to];
+        const lo=before&&before.id!==moved.id?wallOrder(before):wallOrder(list[0])-1000;
+        const hi=after&&after.id!==moved.id?wallOrder(after):wallOrder(list[list.length-1])+1000;
+        moved.order=(lo+hi)/2; moved.updated=Date.now();
+        await dbPut(moved); scheduleSync();
+      }
+      drag=null; renderWall(); render();
+    };
+    el.addEventListener("pointermove",onMove); el.addEventListener("pointerup",onUp); el.addEventListener("pointercancel",onUp);
+  });
+})();
+// poster: one picture of the whole stash
+$("#wallPoster").onclick=async()=>{
+  const list=wallList(); if(!list.length){ toast("Add a Jelly first"); return }
+  busy(true,"Making the poster");
+  try{
+    try{ await document.fonts.load('800 80px "Baloo 2"') }catch(e){}
+    const cols=list.length<=4?2:(list.length<=12?3:4), pad=70, gap=28, W=1400;
+    const tile=Math.floor((W-pad*2-gap*(cols-1))/cols), rows=Math.ceil(list.length/cols);
+    const head=250, foot=110, rowH=tile+92;
+    const c=document.createElement("canvas"); c.width=W; c.height=head+rows*rowH+foot;
+    const x=c.getContext("2d");
+    x.fillStyle="#F4EFFF"; x.fillRect(0,0,c.width,c.height);
+    x.fillStyle="#2B1E4F"; x.textAlign="center";
+    x.font='800 86px "Baloo 2", sans-serif'; x.fillText("The Jelly Stash",W/2,150);
+    x.font='600 40px "Baloo 2", sans-serif'; x.globalAlpha=.7;
+    x.fillText(`${list.length} ${list.length===1?"friend":"friends"}, ${new Date().toLocaleDateString("en-GB",{month:"long",year:"numeric"})}`,W/2,205);
+    x.globalAlpha=1;
+    for(let k=0;k<list.length;k++){
+      const i=list[k], col=k%cols, row=Math.floor(k/cols);
+      const tx=pad+col*(tile+gap), ty=head+row*rowH;
+      if(col===0){ x.fillStyle="#DCCDB4"; x.fillRect(pad-16,ty+tile+56,W-(pad-16)*2,12) }
+      const t=tintOf(i);
+      x.save(); roundRect(x,tx,ty,tile,tile,tile*.16); x.clip();
+      x.fillStyle=t.soft; x.fillRect(tx,ty,tile,tile);
+      const p=photosOf(i)[0];
+      if(p){ try{ const img=await loadImg(blobURL(p)); const s=Math.max(tile/img.naturalWidth,tile/img.naturalHeight), w=img.naturalWidth*s, h=img.naturalHeight*s; x.drawImage(img,tx+(tile-w)/2,ty+(tile-h)/2,w,h) }catch(e){} }
+      else { x.fillStyle="rgba(43,30,79,.28)"; x.font=`800 ${Math.round(tile*.4)}px "Baloo 2", sans-serif`; x.textAlign="center"; x.textBaseline="middle"; x.fillText((i.nickname||i.name||"?").trim()[0].toUpperCase(),tx+tile/2,ty+tile/2); x.textBaseline="alphabetic" }
+      x.restore();
+      x.fillStyle="#2B1E4F"; x.textAlign="center"; x.font='700 30px "Baloo 2", sans-serif';
+      let nm=(i.nickname||i.name||"").trim();
+      while(x.measureText(nm).width>tile&&nm.length>4) nm=nm.slice(0,-2)+"…";
+      x.fillText(nm,tx+tile/2,ty+tile+44);
+    }
+    x.globalAlpha=.55; x.font='700 30px "Baloo 2", sans-serif'; x.fillStyle="#2B1E4F";
+    x.fillText("Made with JellyStash",W/2,c.height-50); x.globalAlpha=1;
+    const blob=await new Promise(r=>c.toBlob(r,"image/png"));
+    busy(false);
+    const file=new File([blob],"jelly-stash-poster.png",{type:"image/png"});
+    if(navigator.canShare&&navigator.canShare({files:[file]})){ try{ await navigator.share({files:[file],title:"The Jelly Stash"}) }catch(e){} }
+    else{ const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=file.name; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),4000) }
+  }catch(e){ busy(false); toast("The poster couldn't be made") }
+};
+
+/* ---------- games ---------- */
+const playable=()=>listOf("parade").filter(i=>photosOf(i).length);
+function openPlay(){ $("#playTitle").textContent="Play"; paintPlayMenu(); $("#play").classList.add("open"); lockBody() }
+function closePlay(){ $("#play").classList.remove("open"); unlockBody() }
+$("#openPlay").onclick=openPlay;
+$("#playClose").onclick=()=>{ if($("#playBody").dataset.game){ $("#playBody").dataset.game=""; $("#playTitle").textContent="Play"; paintPlayMenu() } else closePlay() };
+function paintPlayMenu(){
+  const n=playable().length;
+  $("#playBody").innerHTML=`<div class="playmenu">
+    <button class="gcard" data-g="guess"><span class="ic" style="background:var(--butter)">?</span><span><b>Guess Who</b><span>A close-up of one Jelly, three names to choose from</span></span></button>
+    <button class="gcard" data-g="memory"><span class="ic" style="background:var(--mint)">🧠</span><span><b>Memory match</b><span>Find the pairs of her own Jellies</span></span></button>
+    ${n<3?`<p class="wallhint">Add photos to at least 3 Jellies to play. Right now ${n} ${n===1?"has":"have"} one.</p>`:""}
+  </div>`;
+  $("#playBody").querySelectorAll(".gcard").forEach(b=>b.onclick=()=>{
+    if(playable().length<3){ toast("Add photos to a few more Jellies first"); return }
+    $("#playBody").dataset.game=b.dataset.g;
+    if(b.dataset.g==="guess"){ $("#playTitle").textContent="Guess Who"; startGuess() } else { $("#playTitle").textContent="Memory match"; startMemory() }
+  });
+}
+// Guess Who
+let gRound=0,gScore=0,gAnswer=null;
+const ROUNDS=8;
+function startGuess(){ gRound=0; gScore=0; nextGuess() }
+function nextGuess(){
+  const pool=playable();
+  if(gRound>=ROUNDS||pool.length<3) return endGame(`You got ${gScore} out of ${gRound}`,"Guess Who",startGuess);
+  gRound++;
+  const picks=[...pool].sort(()=>Math.random()-.5).slice(0,3);
+  gAnswer=picks[Math.floor(Math.random()*picks.length)];
+  $("#playBody").innerHTML=`<div class="guess"><p class="scoreline">Round ${gRound} of ${ROUNDS}, ${gScore} right</p>
+    <div class="crop" id="gCrop"></div>
+    <div class="opts">${picks.map(i=>`<button class="btn" data-id="${esc(i.id)}">${esc(i.nickname||i.name||"A friend")}</button>`).join("")}</div></div>`;
+  drawCrop(gAnswer);
+  $("#playBody").querySelectorAll(".opts .btn").forEach(b=>b.onclick=()=>{
+    const right=b.dataset.id===gAnswer.id;
+    if(right){ gScore++; b.classList.add("right") } else { b.classList.add("wrong"); $("#playBody").querySelector(`.opts .btn[data-id="${gAnswer.id}"]`).classList.add("right") }
+    if(navigator.vibrate) navigator.vibrate(right?20:[10,40,10]);
+    $("#playBody").querySelectorAll(".opts .btn").forEach(x=>x.onclick=null);
+    drawCrop(gAnswer,true);
+    setTimeout(nextGuess,1200);
+  });
+}
+async function drawCrop(i,whole){
+  const box=$("#gCrop"); if(!box) return;
+  const p=photosOf(i)[0]; if(!p) return;
+  try{
+    const img=await loadImg(blobURL(p)), S=520, c=document.createElement("canvas"); c.width=S; c.height=S;
+    const x=c.getContext("2d"), W=img.naturalWidth, H=img.naturalHeight;
+    if(whole){ const s=Math.max(S/W,S/H); x.drawImage(img,(S-W*s)/2,(S-H*s)/2,W*s,H*s) }
+    else{
+      const side=Math.min(W,H)*0.3, sx=Math.random()*(W-side), sy=Math.random()*(H-side)*0.8;
+      x.drawImage(img,sx,sy,side,side,0,0,S,S);
+    }
+    box.innerHTML=""; box.appendChild(c);
+  }catch(e){}
+}
+// Memory match
+let mFlipped=[],mLock=false,mMoves=0,mDone=0,mPairs=6;
+function startMemory(){
+  const pool=playable();
+  mPairs=Math.min(pool.length,pool.length<6?pool.length:(pool.length<9?6:8));
+  const picks=[...pool].sort(()=>Math.random()-.5).slice(0,mPairs);
+  const cards=[...picks,...picks].sort(()=>Math.random()-.5);
+  mFlipped=[]; mLock=false; mMoves=0; mDone=0;
+  const cols=mPairs<=4?3:4;
+  $("#playBody").innerHTML=`<p class="scoreline" style="text-align:center" id="mScore">0 moves</p>
+    <div class="mgrid" style="grid-template-columns:repeat(${cols},1fr)">${cards.map((i,k)=>{
+      const t=tintOf(i);
+      return `<button class="mcard" data-id="${esc(i.id)}" data-k="${k}"><span class="inner"><span class="face back">?</span><span class="face front" style="--tint:${t.soft}"><img src="${esc(picOf(i))}" alt=""></span></span></button>`;
+    }).join("")}</div>`;
+  $("#playBody").querySelectorAll(".mcard").forEach(b=>b.onclick=()=>flipCard(b));
+}
+function flipCard(b){
+  if(mLock||b.classList.contains("up")||b.classList.contains("done")) return;
+  b.classList.add("up"); mFlipped.push(b);
+  if(mFlipped.length<2) return;
+  mMoves++; $("#mScore").textContent=`${mMoves} move${mMoves===1?"":"s"}`;
+  const [a,c]=mFlipped;
+  if(a.dataset.id===c.dataset.id){
+    mFlipped=[]; mDone++;
+    setTimeout(()=>{ a.classList.add("done"); c.classList.add("done"); if(navigator.vibrate) navigator.vibrate(20);
+      if(mDone===mPairs){ const best=LS.get("stash-memory-best-"+mPairs,0); const isBest=!best||mMoves<best; if(isBest) LS.set("stash-memory-best-"+mPairs,mMoves);
+        setTimeout(()=>endGame(`All ${mPairs} pairs in ${mMoves} moves${isBest?". A new best!":`. Best is ${best}.`}`,"Memory match",startMemory),500) } },350);
+  }else{
+    mLock=true;
+    setTimeout(()=>{ a.classList.remove("up"); c.classList.remove("up"); mFlipped=[]; mLock=false },900);
+  }
+}
+function endGame(line,title,again){
+  $("#playBody").innerHTML=`<div class="gend"><h3>${esc(title)}</h3><p class="lead" style="color:var(--ink2);font-weight:600">${esc(line)}</p>
+    <div class="form" style="margin-top:18px"><button class="btn wide" id="gAgain">Play again</button><button class="btn wide alt" id="gMenu">Other games</button></div></div>`;
+  $("#gAgain").onclick=again;
+  $("#gMenu").onclick=()=>{ $("#playBody").dataset.game=""; $("#playTitle").textContent="Play"; paintPlayMenu() };
+}
+
 function renderList(){
   const isWish=view==="wish";
   const all=listOf(isWish?"wish":"parade");
@@ -877,6 +1149,7 @@ function renderList(){
     e.innerHTML=`<h2>No one matches</h2><p>Try a different word or filter.</p><button class="btn alt" data-act="clear">Show everyone</button>`;
   }else e.classList.add("hide");
   $("#startParade").classList.toggle("hide",isWish||all.length<2);
+  $("#ctaRow").classList.toggle("hide",isWish||all.length<2);
   const browsing=!isWish&&!$("#q").value.trim()&&filter==="all";
   renderNudges(!isWish);
   renderSpotlight(browsing?all:[]);
@@ -945,7 +1218,7 @@ function render(){
   $("#vList").classList.toggle("hide",!(view==="parade"||view==="wish"));
   $("#vStats").classList.toggle("hide",view!=="stats");
   $("#vMore").classList.toggle("hide",view!=="more");
-  $("#startParade").classList.add("hide");
+  $("#startParade").classList.add("hide"); $("#ctaRow").classList.add("hide");
   $$(".tabs [data-view]").forEach(b=>{ if(b.dataset.view===view) b.setAttribute("aria-current","page"); else b.removeAttribute("aria-current") });
   $("#checkTagBtn").classList.toggle("hide",view!=="wish");
   $("#wishShareBtn").classList.toggle("hide",view!=="wish");
@@ -1602,6 +1875,8 @@ document.addEventListener("keydown",e=>{
     if(e.key==="Escape") stopParade();
     if(e.key==="ArrowRight"){ showIdx++; nextSlide() }
     if(e.key==="ArrowLeft"){ showIdx=(showIdx-1+showList.length)%showList.length; nextSlide() }
+  }else if($("#wall").classList.contains("open")&&e.key==="Escape"){ closeWall();
+  }else if($("#play").classList.contains("open")&&e.key==="Escape"){ closePlay();
   }else if($("#meet").classList.contains("open")&&!openSheets.length){
     if(e.key==="Escape") closeMeet();
     if(meetList.length>1&&(e.key==="ArrowRight"||e.key==="ArrowLeft")){ meetIdx=(meetIdx+(e.key==="ArrowRight"?1:-1)+meetList.length)%meetList.length; meetPhoto=0; paintMeet() }

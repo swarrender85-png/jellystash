@@ -30,6 +30,11 @@ vendor/                  ZBar WASM (LGPL-2.1+, unmodified)
 
 "Snap the tag" takes one photo of the paper hang tag and reads it on the device: Tesseract (OCR) reads the name ("This is ..."), the collection line and the style code, and ZBar reads the barcode from the same photo, trying sideways too. If there's a barcode it's also looked up for size and a shop picture. Words mangled by a thumb or crease are repaired against the collection line and known ranges (e.g. "Jascables" becomes "Amuseables"). Nothing is sent anywhere except the optional barcode lookup. The reader (about 13 MB) downloads only the first time it's used.
 
+## Jelly wall and games (1.8)
+
+- **Jelly wall:** shelves of the whole stash. Press and drag to reorder; the order is a number per Jelly (fractional midpoints), so a move writes one record and syncs like anything else. The share button renders a poster PNG of the whole stash on a canvas.
+- **Games:** Guess Who (a random 30% crop of one Jelly's photo, three names) and Memory match (pairs from her own photos, best score per size in localStorage). Both need photos on at least 3 Jellies.
+
 ## Features added in 1.2
 
 - **Keeping data safe:** a banner asks for Add to Home Screen when opened in a browser (browsers can clear website data after a period without use), and one asks to turn on sync once there are 5 or more Jellies. One banner at a time, each can be snoozed.
