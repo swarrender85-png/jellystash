@@ -406,6 +406,7 @@ input.input[type="date"]::-webkit-calendar-picker-indicator{opacity:.6}
       <button type="button" data-status="parade" aria-pressed="true">In the stash</button>
       <button type="button" data-status="wish" aria-pressed="false">On the wishlist</button>
     </div>
+    <div class="field"><label for="fType">Type</label><select class="input" id="fType"></select></div>
     <div class="field">
       <label>Photos</label>
       <div class="photos" id="fPhotos"></div>
@@ -497,7 +498,7 @@ input.input[type="date"]::-webkit-calendar-picker-indicator{opacity:.6}
 <div class="busy" id="updating" style="z-index:100"><div><div class="spin"></div><span id="updatingText">Updating JellyStash</span><p class="muted small" id="updatingSub" style="margin:6px 0 0">This only takes a moment.</p></div></div>
 <script>
 "use strict";
-const VERSION="1.5.0";
+const VERSION="1.6.0";
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const LS={get(k,d){try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}},del(k){try{localStorage.removeItem(k)}catch(e){}}};
@@ -634,6 +635,11 @@ function autoColour(t){
 const colourOf=i=>i.colour||autoColour(i.tint);
 const swatch=c=>`<span class="sw" style="background:${COLOURS[c]||"#ccc"}"></span>`;
 const tagHTML=(code,sub)=>`<span class="tag"><i class="rib"></i><span class="tg"><b>${sub?`<small>${esc(sub)}</small>`:""}${esc(code)}</b></span></span>`;
+const TYPES=["Plush","Pin badge","Bag charm","Keyring","Other"];
+const TYPE_PLURAL={"Plush":"Plush","Pin badge":"Pin badges","Bag charm":"Bag charms","Keyring":"Keyrings","Other":"Other"};
+const typeOf=i=>i.type||"Plush";
+// Jellycat pin badges use style codes starting PIN (e.g. PIN6GRE)
+const typeFromCode=c=>/^PIN/i.test(String(c||""))?"Pin badge":"";
 const photosOf=i=>Array.isArray(i.photos)?i.photos.filter(Boolean):[];
 function picOf(i){ const p=photosOf(i)[0]; if(p) return blobURL(p); return i.refImage||"" }
 const initial=i=>esc(((i.nickname||i.name||"?").trim()[0]||"?").toUpperCase());
@@ -744,6 +750,7 @@ function currentList(){
   let list=listOf(view==="wish"?"wish":"parade");
   if(filter==="fav") list=list.filter(i=>i.fav);
   else if(filter==="retired") list=list.filter(i=>i.retired);
+  else if(filter.startsWith("t:")) list=list.filter(i=>typeOf(i)===filter.slice(2));
   else if(filter.startsWith("c:")) list=list.filter(i=>colourOf(i)===filter.slice(2));
   else if(filter.startsWith("k:")) list=list.filter(i=>(i.kind||"Other")===filter.slice(2));
   else if(filter.startsWith("r:")) list=list.filter(i=>(i.range||"")===filter.slice(2));
@@ -770,13 +777,15 @@ function renderChips(){
   Object.entries(ranges).filter(([,n])=>n>1).sort((a,b)=>b[1]-a[1]).forEach(([r,n])=>chips.push(["r:"+r,r,n]));
   const cols={}; base.forEach(i=>{ const c=colourOf(i); if(c) cols[c]=(cols[c]||0)+1 });
   if(base.length>=4&&Object.keys(cols).length>1) Object.keys(COLOURS).forEach(c=>{ if(cols[c]) chips.push(["c:"+c,c,cols[c],c]) });
+  const types={}; base.forEach(i=>{ const t=typeOf(i); types[t]=(types[t]||0)+1 });
+  if(Object.keys(types).length>1) [...TYPES].reverse().forEach(t=>{ if(types[t]) chips.splice(1,0,["t:"+t,TYPE_PLURAL[t],types[t]]) });
   const ret=base.filter(i=>i.retired).length; if(ret) chips.push(["retired","Retired",ret]);
   if(!chips.some(c=>c[0]===filter)) filter="all";
   $("#chips").innerHTML=base.length<2?"":chips.map(([k,l,n,sw])=>`<button class="chip" data-f="${esc(k)}" aria-pressed="${k===filter}">${sw?swatch(sw):""}${esc(l)}<small>${n}</small></button>`).join("");
 }
 function cardHTML(i){
   const t=tintOf(i), pic=picOf(i);
-  const meta=[i.size,i.range&&i.range!==(i.name||"").split(" ")[0]?i.range:"",i.kind].filter(Boolean).slice(0,2).join(", ");
+  const meta=[typeOf(i)!=="Plush"?typeOf(i):"",i.size,i.range&&i.range!==(i.name||"").split(" ")[0]?i.range:"",i.kind].filter(Boolean).slice(0,2).join(", ");
   return `<button class="card" data-id="${esc(i.id)}" style="--tint:${t.soft}">
     ${i.code?tagHTML(i.code):""}
     <div class="ph"><span class="mono">${initial(i)}</span>${pic?`<img src="${esc(pic)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">`:""}
@@ -787,6 +796,11 @@ function cardHTML(i){
     <div class="meta">${esc(i.nickname&&i.name?i.name:meta||"\u00a0")}</div>
   </button>`;
 }
+function stashCountText(all){
+  const pins=all.filter(i=>typeOf(i)==="Pin badge").length, rest=all.length-pins;
+  const f=n=>`${n} friend${n===1?"":"s"}`, p=n=>`${n} pin badge${n===1?"":"s"}`;
+  return (pins&&rest?`${f(rest)} and ${p(pins)}`:pins?p(pins):f(rest))+" in the stash";
+}
 function renderList(){
   const isWish=view==="wish";
   const all=listOf(isWish?"wish":"parade");
@@ -794,7 +808,7 @@ function renderList(){
   const favs=all.filter(i=>i.fav).length;
   $("#listSub").textContent=isWish
     ? (all.length?`${all.length} on the wishlist`:"The wishlist")
-    : (all.length?`${all.length} friend${all.length===1?"":"s"} in the stash`+(favs?`, ${favs} favourite${favs===1?"":"s"}`:""):"Your plush collection");
+    : (all.length?stashCountText(all)+(favs?`, ${favs} favourite${favs===1?"":"s"}`:""):"Your plush collection");
   renderChips();
   $("#searchRow").classList.toggle("hide",all.length<4);
   $("#grid").innerHTML=list.map(cardHTML).join("");
@@ -929,7 +943,7 @@ $("#codeGo").onclick=()=>{
   const v=$("#codeInput").value.trim();
   if(!v){ toast("Type the code from the tag first"); return }
   hideSheet();
-  const go=()=>{ const d=decodeCode(v)||{}; openForm(null,{status:addStatus,code:v,range:d.range||"",size:d.size||""},d.range||d.size?`Filled in the range and size from the code. Add a name and a photo.`:"") };
+  const go=()=>{ const d=decodeCode(v)||{}; openForm(null,{status:addStatus,code:v,type:typeFromCode(v),range:d.range||"",size:d.size||""},d.range||d.size?`Filled in the range and size from the code. Add a name and a photo.`:"") };
   const dup=byCode(v);
   if(dup.length) duplicateSheet(dup,go); else go();
 };
@@ -1117,6 +1131,7 @@ async function readTag(file){
     const sc=(p.name?2:0)+(p.code?2:0)+(p.collection?1:0)+(p.barcode?1:0);
     if(sc>score){ best=p; score=sc }
     if(p.name&&p.code) break;
+    if(p.code&&(p.barcode||barcode)) break;
   }
   tessProgress=null;
   best.barcode=barcode||best.barcode;
@@ -1146,14 +1161,15 @@ async function snapToAdd(file,status){
     const dec=t.code?decodeCode(t.code):null;
     const name=t.name||fromDb.name||"";
     const draft={
-      status, name, code:t.code||fromDb.code||"", barcode:t.barcode||"",
+      status, name, code:t.code||fromDb.code||"", barcode:t.barcode||"", type:typeFromCode(t.code||fromDb.code),
       range:findRange(t.collection)||findRange(name)||fromDb.range||dec?.range||"",
       kind:findKind(name)||fromDb.kind||"",
       size:fromDb.size||dec?.size||findSize(name)||"",
       refImage:fromDb.refImage||""
     };
     const got=[t.name&&"name",t.code&&"style code",t.barcode&&"barcode"].filter(Boolean);
-    const photoNote=draft.refImage?"Check it, then add her own photo.":(look&&look.found?"The barcode database has no picture for this one, so take a photo or find one online.":"The barcode database doesn't know this one yet, so there's no picture. Take a photo, or find one online.");
+    const pinNote=draft.type==="Pin badge"&&!name?"This is a pin badge, and its name is on the front of the card, so type it in. ":"";
+    const photoNote=pinNote+(draft.refImage?"Check it, then add her own photo.":(look&&look.found?"The barcode database has no picture for this one, so take a photo or find one online.":"The barcode database doesn't know this one yet, so there's no picture. Take a photo, or find one online."));
     openForm(null,draft,`Read the ${got.join(", ").replace(/, ([^,]*)$/," and $1")} from the tag${fromDb.name?", plus details from the barcode database":""}. ${photoNote}`);
   };
   const dups=t.barcode?byBarcode(t.barcode):(t.code?byCode(t.code):[]);
@@ -1233,6 +1249,7 @@ $("#scanManual").onclick=()=>{ const c=scanCb; closeScanner(); if(c) promptBarco
 /* ---------- the form ---------- */
 Object.keys(COLOURS).forEach(c=>{ const o=document.createElement("option"); o.value=c; o.textContent=c; $("#fColour").appendChild(o) });
 function paintAutoColour(){ const a=autoColour(editing&&editing.tint); $("#fColour").options[0].textContent=a?`Auto (${a})`:"Auto"; }
+TYPES.forEach(t=>{ const o=document.createElement("option"); o.value=t; o.textContent=t; $("#fType").appendChild(o) });
 SIZES.forEach(s=>{ const o=document.createElement("option"); o.value=s; o.textContent=s; $("#fSize").appendChild(o) });
 function openForm(item,draft,banner,warn){
   const base=item?{...item,photos:photosOf(item).slice(),photoHashes:(item.photoHashes||[]).slice()}:{id:null,status:"parade",name:"",nickname:"",range:"",kind:"",size:"",code:"",barcode:"",adopted:"",from:"",price:null,fav:false,retired:false,notes:"",photos:[],photoHashes:[],refImage:"",tint:null};
@@ -1246,6 +1263,7 @@ function openForm(item,draft,banner,warn){
   $("#fCode").value=editing.code||""; $("#fBarcode").value=editing.barcode||"";
   $("#fDate").value=editing.adopted||""; $("#fPrice").value=editing.price!=null&&editing.price!==""?editing.price:"";
   $("#fFrom").value=editing.from||""; $("#fNotes").value=editing.notes||"";
+  $("#fType").value=editing.type||typeFromCode(editing.code)||"Plush";
   $("#fColour").value=editing.colour||""; $("#fTags").value=editing.tags||""; $("#fCond").value=editing.condition||""; $("#fHome").value=editing.home||""; paintAutoColour();
   $("#fFav").setAttribute("aria-pressed",!!editing.fav); $("#fRetired").setAttribute("aria-pressed",!!editing.retired);
   $("#fDelete").classList.toggle("hide",!item);
@@ -1348,6 +1366,7 @@ $("#fCode").oninput=()=>{
   $("#fCodeHint").textContent=formCodeHint(v);
 };
 $("#fCode").onchange=()=>{
+  const tc=typeFromCode($("#fCode").value); if(tc&&$("#fType").value==="Plush") $("#fType").value=tc;
   const d=decodeCode($("#fCode").value);
   if(!d) return;
   if(d.range&&!$("#fRange").value) $("#fRange").value=d.range;
@@ -1377,6 +1396,7 @@ $("#fSave").onclick=async()=>{
     range:$("#fRange").value.trim(), kind:$("#fKind").value.trim()||findKind(name),
     size:$("#fSize").value, code:$("#fCode").value.trim().toUpperCase(), barcode:normBarcode($("#fBarcode").value),
     adopted:$("#fDate").value, price:price?Number(price):null, from:$("#fFrom").value.trim(), notes:$("#fNotes").value.trim(),
+    type:$("#fType").value==="Plush"?"":$("#fType").value,
     colour:$("#fColour").value, tags:$("#fTags").value, condition:$("#fCond").value, home:$("#fHome").value.trim(),
     fav:$("#fFav").getAttribute("aria-pressed")==="true", retired:$("#fRetired").getAttribute("aria-pressed")==="true",
     created:editing.created||Date.now(), updated:Date.now()
@@ -1422,7 +1442,7 @@ function paintMeet(){
   $("#meetFav").innerHTML=`<svg style="color:var(--pink)"><use href="#i-${live.fav?"heart":"heart-o"}"/></svg>`;
   const wish=live.status==="wish";
   const facts=[
-    ["Range",live.range],["Kind",live.kind],["Size",live.size],
+    ["Type",typeOf(live)!=="Plush"?typeOf(live):""],["Range",live.range],["Kind",live.kind],["Size",live.size],
     ["Colour",colourOf(live)],
     [wish?"Wished for since":"Joined",fmtDate(live.adopted)],["From",live.from],["Lives",live.home],["Tags",live.tags],["Condition",live.condition],
     ["Price",live.price!=null&&live.price!==""?money(live.price):""],["Barcode",live.barcode]
@@ -1562,6 +1582,7 @@ function renderStats(){
       <div class="mini"><b>${newThisYear}</b><span>New in ${thisYear}</span></div>
       <div class="mini"><b>${own.filter(i=>i.retired).length}</b><span>Retired designs</span></div>
     </div>
+    ${new Set(own.map(typeOf)).size>1?`<div class="panel"><h4>Types</h4>${barList(count(own,i=>TYPE_PLURAL[typeOf(i)]))}</div>`:""}
     <div class="panel"><h4>Who's in the stash</h4>${barList(kinds)}</div>
     ${Object.keys(ranges).length?`<div class="panel"><h4>Ranges</h4>${barList(ranges)}</div>`:""}
     ${Object.keys(sizes).length?`<div class="panel"><h4>Sizes</h4>${barList(sizes,SIZES)}</div>`:""}
