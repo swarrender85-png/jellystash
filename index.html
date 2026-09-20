@@ -490,7 +490,7 @@ input.input[type="date"]::-webkit-calendar-picker-indicator{opacity:.6}
 <div class="busy" id="updating" style="z-index:100"><div><div class="spin"></div><span id="updatingText">Updating JellyStash</span><p class="muted small" id="updatingSub" style="margin:6px 0 0">This only takes a moment.</p></div></div>
 <script>
 "use strict";
-const VERSION="1.4.1";
+const VERSION="1.4.2";
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const LS={get(k,d){try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}},del(k){try{localStorage.removeItem(k)}catch(e){}}};
@@ -1138,7 +1138,8 @@ async function snapToAdd(file,status){
       refImage:fromDb.refImage||""
     };
     const got=[t.name&&"name",t.code&&"style code",t.barcode&&"barcode"].filter(Boolean);
-    openForm(null,draft,`Read the ${got.join(", ").replace(/, ([^,]*)$/," and $1")} from the tag${fromDb.name?", plus details from the barcode database":""}. Check it, then add her own photo.`);
+    const photoNote=draft.refImage?"Check it, then add her own photo.":(look&&look.found?"The barcode database has no picture for this one, so take a photo or find one online.":"The barcode database doesn't know this one yet, so there's no picture. Take a photo, or find one online.");
+    openForm(null,draft,`Read the ${got.join(", ").replace(/, ([^,]*)$/," and $1")} from the tag${fromDb.name?", plus details from the barcode database":""}. ${photoNote}`);
   };
   const dups=t.barcode?byBarcode(t.barcode):(t.code?byCode(t.code):[]);
   if(dups.length){ busy(false); duplicateSheet(dups,go) } else go();
@@ -1246,11 +1247,20 @@ function paintPhotos(){
   let h=ph.map((p,k)=>`<div class="slot filled"><img src="${blobURL(p)}" alt=""><button class="x" data-rm="${k}" aria-label="Remove photo">×</button></div>`).join("");
   if(!ph.length&&editing.refImage) h+=`<div class="slot filled"><img src="${esc(editing.refImage)}" alt="" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"><span class="ref">Shop picture</span><button class="x" data-rmref="1" aria-label="Remove shop picture">×</button></div>`;
   if(ph.length<4) h+=`<button type="button" class="slot" id="addPhoto"><span><svg width="28" height="28"><use href="#i-camera"/></svg><br>Take a photo</span></button><button type="button" class="slot" id="pickPhoto"><span><svg width="28" height="28"><use href="#i-gallery"/></svg><br>Choose from photos</span></button>`;
+  if(!ph.length&&!editing.refImage) h+=`<button type="button" class="slot" id="findPhoto"><span><svg width="28" height="28"><use href="#i-search"/></svg><br>Find one online</span></button>`;
   $("#fPhotos").innerHTML=h;
 }
 $("#fPhotos").onclick=e=>{
   if(e.target.closest("#addPhoto")){ $("#fPhotoInput").value=""; $("#fPhotoInput").click(); return }
   if(e.target.closest("#pickPhoto")){ $("#fPhotoPick").value=""; $("#fPhotoPick").click(); return }
+  if(e.target.closest("#findPhoto")){
+    const n=($("#fName").value||$("#fNick").value||"").trim();
+    if(!n){ toast("Add the name first, then search"); $("#fName").focus(); return }
+    // opens an image search in the browser; save a picture there, then use "Choose from photos"
+    window.open("https://www.google.com/search?tbm=isch&q="+encodeURIComponent("Jellycat "+n),"_blank","noopener");
+    toast("Save a picture you like, then tap Choose from photos");
+    return;
+  }
   const rm=e.target.closest("[data-rm]"); if(rm){ const k=+rm.dataset.rm; editing.photos.splice(k,1); editing.photoHashes.splice(k,1); if(k===0) editing.tint=null; paintPhotos(); return }
   if(e.target.closest("[data-rmref]")){ editing.refImage=""; paintPhotos() }
 };
