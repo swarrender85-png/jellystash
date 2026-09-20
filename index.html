@@ -490,7 +490,7 @@ input.input[type="date"]::-webkit-calendar-picker-indicator{opacity:.6}
 <div class="busy" id="updating" style="z-index:100"><div><div class="spin"></div><span id="updatingText">Updating JellyStash</span><p class="muted small" id="updatingSub" style="margin:6px 0 0">This only takes a moment.</p></div></div>
 <script>
 "use strict";
-const VERSION="1.4.0";
+const VERSION="1.4.1";
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const LS={get(k,d){try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}},del(k){try{localStorage.removeItem(k)}catch(e){}}};
@@ -1027,26 +1027,41 @@ function parseTag(text){
   if(!out.code) for(const l of lines){ for(const t of l.split(" ")){ const w=t.toUpperCase().replace(/[^A-Z0-9]/g,""); if(w.length>=4&&isCode(w)&&/[A-Z]{2}/.test(w)){ out.code=w; break } } if(out.code) break }
   // barcode printed under the bars, as a fallback when the bars themselves won't read
   for(const l of lines){ const d=l.replace(/[^0-9]/g,""); const m=d.match(/0?670983\d{6}/); if(m&&upcValid(m[0])){ out.barcode=m[0]; break } }
-  const look=lines.findIndex(l=>/look\s*after/i.test(l));
+  const look=lines.findIndex(l=>/look\s*after|please\s+look|\blook\b/i.test(l));
   if(look>-1){
     // walk up from "Please look after me", taking the trailing run of real words on each
     // line (fingers and the reverse of the tag add junk to the left), skipping one junk line
     let start=look-1, junk=0; const nameLines=[];
     while(start>=0&&nameLines.length<2){
       const l=lines[start];
-      if(/\bthis\s*is\b/i.test(l)){ const rest=l.replace(/.*\bthis\s*is\b/i,"").trim(); if(rest) nameLines.unshift(rest); break }
+      if(/\b(this|name)\s*is\b/i.test(l)){ const rest=l.replace(/.*\b(this|name)\s*is\b/i,"").trim(); if(rest) nameLines.unshift(rest); break }
       if(/^(is|this)$/i.test(l)) break;
       const toks=l.split(" "), run=[];
+      while(toks.length&&!/[A-Za-z]/.test(toks[toks.length-1])) toks.pop();
       for(let k=toks.length-1;k>=0;k--){ const t=toks[k].replace(/[.,:;!]+$/,""); if(/^[A-Za-z][A-Za-z'&-]*$/.test(t)&&t.length>=2) run.unshift(t); else break }
       const cand=run.join(" ");
       if(cand.replace(/[^A-Za-z]/g,"").length>=3){ nameLines.unshift(cand); junk=0 } else if(++junk>1) break;
       start--;
     }
     out.name=nameLines.join(" ").replace(/^(this\s*)?is\s+/i,"").trim();
-    for(let k=look+1;k<Math.min(lines.length,look+4);k++){
-      const l=lines[k], w=l.toUpperCase().replace(/[^A-Z0-9]/g,"");
+    let collIdx=-1;
+    for(let k=look+1;k<Math.min(lines.length,look+5);k++){
+      const l=lines[k].replace(/[^A-Za-z' &]+$/,"").trim(), w=l.toUpperCase().replace(/[^A-Z0-9]/g,"");
       if(w===out.code||/jellycat|joy of it/i.test(l)) break;
-      if(/^[A-Za-z][A-Za-z' &-]{2,40}$/.test(l)){ out.collection=l; break }
+      if(/^[A-Za-z][A-Za-z' &-]{2,40}$/.test(l)&&(findRange(l)||collIdx<0)){ out.collection=l; collIdx=k; if(findRange(l)) break }
+    }
+    // the style code sits right under the collection; fix digits misread as letters (A6PEN read as AGPEN)
+    if(!out.code&&collIdx>-1){
+      const LOOK={G:"6",S:"5",O:"0",I:"1",L:"1",B:"8",Z:"2",T:"7",Q:"0",D:"0"};
+      for(let k=collIdx+1;k<Math.min(lines.length,collIdx+3)&&!out.code;k++){
+        const w=lines[k].split(" ")[0].toUpperCase().replace(/[^A-Z0-9]/g,"");
+        if(isCode(w)){ out.code=w; break }
+        for(let p=1;p<Math.min(7,w.length-1)&&!out.code;p++){
+          if(!/^[A-Z]+$/.test(w.slice(0,p))||!LOOK[w[p]]) continue;
+          const fixed=w.slice(0,p)+LOOK[w[p]]+w.slice(p+1);
+          if(isCode(fixed)) out.code=fixed;
+        }
+      }
     }
   }
   // repair words the thumb or a crease mangled, using the collection line ("useables" -> "Amuseables")
@@ -1087,7 +1102,11 @@ async function readTag(file){
   for(const deg of [0,90,270]){
     tessProgress=m=>{ if(m.status==="recognizing text") $("#busyText").textContent=`Reading the tag ${Math.round((m.progress||0)*100)}%` };
     const {data}=await w.recognize(deg?rotateCanvas(c,deg):c);
-    const p=parseTag(data.text), sc=(p.name?2:0)+(p.code?2:0)+(p.collection?1:0)+(p.barcode?1:0);
+    const clean=(data.lines||[]).map(l=>(l.words||[]).filter(x=>x.confidence>=55).map(x=>x.text).join(" ")).filter(Boolean).join("\n");
+    // confident words first; anything they miss is filled from the full reading
+    const p=parseTag(clean||data.text), q=parseTag(data.text);
+    for(const k of ["name","collection","code","barcode"]) if(!p[k]&&q[k]) p[k]=q[k];
+    const sc=(p.name?2:0)+(p.code?2:0)+(p.collection?1:0)+(p.barcode?1:0);
     if(sc>score){ best=p; score=sc }
     if(p.name&&p.code) break;
   }
