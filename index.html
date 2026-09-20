@@ -305,10 +305,10 @@ input.input[type="date"]::-webkit-calendar-picker-indicator{opacity:.6}
 .shelf{margin:0 0 26px}
 .shelf .row{display:flex;align-items:stretch;justify-content:center;gap:10px}
 .shelf .plank{height:12px;border-radius:0 0 8px 8px;background:linear-gradient(#E8DCC8,#D6C4A8);box-shadow:0 4px 8px rgba(43,30,79,.14)}
-.wtile{position:relative;flex:1 1 0;max-width:150px;text-align:center;touch-action:none;display:flex;flex-direction:column;justify-content:flex-end}
+.wtile{position:relative;flex:1 1 0;min-width:0;max-width:150px;text-align:center;touch-action:none;display:flex;flex-direction:column;justify-content:flex-end}
 .wtile .pic{width:var(--sc,100%);margin:0 auto;aspect-ratio:1;border-radius:18px;overflow:hidden;background:var(--tint,#EADFFF);display:grid;place-items:center;font:800 32px var(--display);color:rgba(43,30,79,.3)}
 .wtile .pic img{width:100%;height:100%;object-fit:cover}
-.wtile .nm{height:17px;line-height:17px;font-size:11.5px;font-weight:700;margin-top:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--ink2)}
+.wtile .nm{max-width:100%;height:17px;line-height:17px;font-size:11.5px;font-weight:700;margin-top:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--ink2)}
 .wtile.drag{opacity:.25}
 .wtile.gap{opacity:.35}
 #dragGhost{position:fixed;z-index:60;pointer-events:none;width:120px;transform:translate(-50%,-50%) rotate(-4deg) scale(1.08);filter:drop-shadow(0 12px 20px rgba(43,30,79,.35))}
@@ -623,7 +623,7 @@ input.input[type="date"]::-webkit-calendar-picker-indicator{opacity:.6}
 <div class="busy" id="updating" style="z-index:100"><div><div class="spin"></div><span id="updatingText">Updating JellyStash</span><p class="muted small" id="updatingSub" style="margin:6px 0 0">This only takes a moment.</p></div></div>
 <script>
 "use strict";
-const VERSION="1.9.1";
+const VERSION="1.9.2";
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const LS={get(k,d){try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}},del(k){try{localStorage.removeItem(k)}catch(e){}}};
