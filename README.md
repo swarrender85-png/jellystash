@@ -26,6 +26,10 @@ wish.html                the family wishlist page, served at /w/<id> via _redire
 vendor/                  ZBar WASM (LGPL-2.1+, unmodified)
 ```
 
+## Snap the tag (1.3)
+
+"Snap the tag" takes one photo of the paper hang tag and reads it on the device: Tesseract (OCR) reads the name ("This is ..."), the collection line and the style code, and ZBar reads the barcode from the same photo, trying sideways too. If there's a barcode it's also looked up for size and a shop picture. Words mangled by a thumb or crease are repaired against the collection line and known ranges (e.g. "Jascables" becomes "Amuseables"). Nothing is sent anywhere except the optional barcode lookup. The reader (about 13 MB) downloads only the first time it's used.
+
 ## Features added in 1.2
 
 - **Keeping data safe:** a banner asks for Add to Home Screen when opened in a browser (browsers can clear website data after a period without use), and one asks to turn on sync once there are 5 or more Jellies. One banner at a time, each can be snoozed.
@@ -54,5 +58,8 @@ scripts/bump-version.sh 1.2.0
 Installed copies check `version.json` on launch, when reopened, and every 15 minutes. If a newer version is live they update immediately (waiting only until any open form or scanner is closed), then reload. The current version is shown under More.
 
 ## Third-party code
+
+`vendor/tesseract/` is [Tesseract.js](https://github.com/naptha/tesseract.js) 5.1.1 with its LSTM WebAssembly cores and the `eng` 4.0.0_best_int language data, used unmodified under the Apache 2.0 licence (see the LICENSE files in that folder).
+
 
 `vendor/zbar-wasm.mjs` and `vendor/zbar.wasm` are the [@undecaf/zbar-wasm](https://github.com/undecaf/zbar-wasm) build of ZBar, used unmodified under the LGPL-2.1+ (see `vendor/zbar-wasm-LICENSE`).
