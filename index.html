@@ -303,12 +303,12 @@ input.input[type="date"]::-webkit-calendar-picker-indicator{opacity:.6}
 .ovbar h2{font:800 24px/1 var(--display);margin:0;flex:1;text-align:center}
 .ovbody{flex:1;overflow:auto;padding:4px 14px calc(var(--safe-b) + 24px);-webkit-overflow-scrolling:touch}
 .shelf{margin:0 0 26px}
-.shelf .row{display:flex;align-items:flex-end;justify-content:center;gap:10px;min-height:96px}
+.shelf .row{display:flex;align-items:stretch;justify-content:center;gap:10px}
 .shelf .plank{height:12px;border-radius:0 0 8px 8px;background:linear-gradient(#E8DCC8,#D6C4A8);box-shadow:0 4px 8px rgba(43,30,79,.14)}
-.wtile{position:relative;flex:1 1 0;max-width:150px;text-align:center;touch-action:none}
-.wtile .pic{width:100%;aspect-ratio:1;border-radius:18px;overflow:hidden;background:var(--tint,#EADFFF);display:grid;place-items:center;font:800 32px var(--display);color:rgba(43,30,79,.3);transform-origin:50% 100%}
+.wtile{position:relative;flex:1 1 0;max-width:150px;text-align:center;touch-action:none;display:flex;flex-direction:column;justify-content:flex-end}
+.wtile .pic{width:var(--sc,100%);margin:0 auto;aspect-ratio:1;border-radius:18px;overflow:hidden;background:var(--tint,#EADFFF);display:grid;place-items:center;font:800 32px var(--display);color:rgba(43,30,79,.3)}
 .wtile .pic img{width:100%;height:100%;object-fit:cover}
-.wtile .nm{font-size:11.5px;font-weight:700;margin-top:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--ink2)}
+.wtile .nm{height:17px;line-height:17px;font-size:11.5px;font-weight:700;margin-top:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--ink2)}
 .wtile.drag{opacity:.25}
 .wtile.gap{opacity:.35}
 #dragGhost{position:fixed;z-index:60;pointer-events:none;width:120px;transform:translate(-50%,-50%) rotate(-4deg) scale(1.08);filter:drop-shadow(0 12px 20px rgba(43,30,79,.35))}
@@ -623,7 +623,7 @@ input.input[type="date"]::-webkit-calendar-picker-indicator{opacity:.6}
 <div class="busy" id="updating" style="z-index:100"><div><div class="spin"></div><span id="updatingText">Updating JellyStash</span><p class="muted small" id="updatingSub" style="margin:6px 0 0">This only takes a moment.</p></div></div>
 <script>
 "use strict";
-const VERSION="1.9.0";
+const VERSION="1.9.1";
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const LS={get(k,d){try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}},del(k){try{localStorage.removeItem(k)}catch(e){}}};
@@ -931,7 +931,8 @@ function stashCountText(all){
    The order is a number per Jelly, so moving one only changes that one. */
 const wallOrder=i=>(typeof i.order==="number"?i.order:(i.created||0));
 const wallList=()=>listOf("parade").slice().sort((a,b)=>wallOrder(a)-wallOrder(b)||(a.created||0)-(b.created||0));
-const sizeScale=i=>({Tiny:.66,Mini:.7,"Bag charm":.68,Little:.78,Small:.82,Original:1,Medium:1,Large:1.1,Big:1.14,Huge:1.24,"Really Big":1.3,Giant:1.34}[i.size]||.94);
+// each Jelly sits on the shelf at a size that suits it, within its own column
+const sizeScale=i=>({Tiny:.62,Mini:.66,"Bag charm":.62,Little:.74,Small:.8,Original:.88,Medium:.88,Large:.94,Big:.96,Huge:1,"Really Big":1,Giant:1}[i.size]||.86);
 function renderWall(){
   const list=wallList(), perRow=window.innerWidth>700?5:3, stage=$("#wallStage");
   let h="";
@@ -939,7 +940,7 @@ function renderWall(){
     const row=list.slice(k,k+perRow);
     h+=`<div class="shelf"><div class="row">${row.map(i=>{
       const t=tintOf(i), p=picOf(i);
-      return `<div class="wtile" data-id="${esc(i.id)}"><div class="pic" style="--tint:${t.soft};transform:scale(${sizeScale(i).toFixed(2)})">${p?`<img src="${esc(p)}" alt="" referrerpolicy="no-referrer">`:esc(initial(i))}</div><div class="nm">${esc(i.nickname||i.name||"")}</div></div>`;
+      return `<div class="wtile" data-id="${esc(i.id)}"><div class="pic" style="--tint:${t.soft};--sc:${Math.round(sizeScale(i)*100)}%">${p?`<img src="${esc(p)}" alt="" referrerpolicy="no-referrer">`:esc(initial(i))}</div><div class="nm">${esc(i.nickname||i.name||"")}</div></div>`;
     }).join("")}${Array.from({length:perRow-row.length},()=>'<div class="wtile" style="visibility:hidden"></div>').join("")}</div><div class="plank"></div></div>`;
   }
   stage.innerHTML=h||`<p class="wallhint">Add a Jelly and it appears on the shelf.</p>`;

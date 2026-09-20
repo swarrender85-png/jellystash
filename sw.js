@@ -1,4 +1,4 @@
-const VERSION = '1.9.0';
+const VERSION = '1.9.1';
 const CACHE = 'jellystash-' + VERSION;
 
 // NOTE: do not list './' or './index.html' with a trailing-slash mismatch.
