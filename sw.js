@@ -1,4 +1,4 @@
-const VERSION = '1.8.0';
+const VERSION = '1.9.0';
 const CACHE = 'jellystash-' + VERSION;
 
 // NOTE: do not list './' or './index.html' with a trailing-slash mismatch.
@@ -11,7 +11,10 @@ const ASSETS = [
   './manifest.webmanifest',
   './icons/icon-192.png',
   './icons/icon-512.png',
-  './icons/apple-touch-icon.png'
+  './icons/apple-touch-icon.png',
+  './vendor/fonts/baloo-2-latin-800-normal.woff2',
+  './vendor/fonts/baloo-2-latin-700-normal.woff2',
+  './vendor/fonts/baloo-2-latin-600-normal.woff2'
 ];
 // The barcode scanner is big and rarely used, so it isn't precached — but
 // once it's been fetched, the runtime cache below keeps it for offline use.
@@ -65,15 +68,21 @@ self.addEventListener('fetch', e => {
   // live data (sync, photos, barcode lookups) must never come from the cache
   if (url.pathname.startsWith('/api/') || url.pathname === '/version.json') return;
 
-  // Navigations: network first so the newest build always wins, and
-  // always redirect-stripped so Safari will accept the response.
+  // Navigations: serve the cached shell straight away so launching is instant,
+  // and refresh it in the background. Freshness is handled separately: the app
+  // checks /version.json and updates itself when a new build is live.
   if (e.request.mode === 'navigate') {
     e.respondWith((async () => {
-      try {
-        return await stripRedirect(await fetch(e.request));
-      } catch (err) {
-        return (await caches.match('./')) || (await caches.match('./index.html')) || Response.error();
-      }
+      const cached = await caches.match('./');
+      const network = fetch(e.request).then(async res => {
+        if (res && res.ok) {
+          const clean = await stripRedirect(res.clone());
+          caches.open(CACHE).then(c => c.put('./', clean));
+        }
+        return stripRedirect(res);
+      }).catch(() => null);
+      if (cached) { e.waitUntil(network); return cached; }
+      return (await network) || (await caches.match('./index.html')) || Response.error();
     })());
     return;
   }

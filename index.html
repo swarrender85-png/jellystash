@@ -13,10 +13,12 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="icon" href="icons/icon-192.png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&display=swap" rel="stylesheet">
+<link rel="preload" href="vendor/fonts/baloo-2-latin-800-normal.woff2" as="font" type="font/woff2" crossorigin>
 <style>
+/* Baloo 2, served from this site so launching needs no third-party request */
+@font-face{font-family:"Baloo 2";font-style:normal;font-weight:600;font-display:swap;src:url(vendor/fonts/baloo-2-latin-600-normal.woff2) format("woff2")}
+@font-face{font-family:"Baloo 2";font-style:normal;font-weight:700;font-display:swap;src:url(vendor/fonts/baloo-2-latin-700-normal.woff2) format("woff2")}
+@font-face{font-family:"Baloo 2";font-style:normal;font-weight:800;font-display:swap;src:url(vendor/fonts/baloo-2-latin-800-normal.woff2) format("woff2")}
 :root{
   --bg:#F4EFFF; --card:#FFFFFF; --ink:#2B1E4F; --ink2:#6B5F8C; --line:#E3DAF7;
   --pink:#FF4F8B; --pink-deep:#E03A76; --mint:#6FDDBE; --butter:#FFD35A; --sky:#8FB8FF;
@@ -220,7 +222,12 @@ input.input[type="date"]::-webkit-calendar-picker-indicator{opacity:.6}
 
 /* ---------- more ---------- */
 .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-.code{font:800 26px/1 var(--display);letter-spacing:.14em;background:var(--bg);border-radius:14px;padding:12px 16px;display:inline-block}
+.code{font:800 26px/1 var(--display);letter-spacing:.14em;background:var(--bg);border-radius:16px;padding:18px 12px;display:block;width:100%;text-align:center;color:var(--ink);border:2px dashed var(--line)}
+.btns{display:flex;flex-direction:column;gap:10px}
+.btns.two-up{display:grid;grid-template-columns:1fr 1fr}
+.btns .btn,.btns label.btn{width:100%;height:46px;padding:0 8px;font-size:15px}
+.panel h4{margin-bottom:8px}
+.panel p.muted{margin:0 2px 14px}
 .muted{color:var(--ink2);font-size:14.5px}
 .small{font-size:13.5px}
 
@@ -395,28 +402,28 @@ input.input[type="date"]::-webkit-calendar-picker-indicator{opacity:.6}
   <section id="vMore" class="hide">
     <header class="top"><h2 class="brand" style="font-size:44px">More</h2></header>
     <div class="panel">
-      <h4>Sync with another device</h4>
+      <h4>Sync</h4>
       <div id="syncSetup">
         <p class="muted">Use the same code on a phone and an iPad and the stash stays the same on both. No account needed.</p>
-        <div class="row" style="margin-bottom:10px"><button class="btn small" id="syncCreate">Create a sync code</button></div>
-        <div class="inline"><input class="input" id="syncEnter" placeholder="Or type a code from another device" autocapitalize="characters" autocomplete="off"><button class="btn small ink" id="syncJoin">Join</button></div>
+        <div class="btns"><button class="btn small" id="syncCreate">Create a sync code</button></div>
+        <div class="inline" style="margin-top:10px"><input class="input" id="syncEnter" placeholder="Code from another device" autocapitalize="characters" autocomplete="off"><button class="btn small ink" id="syncJoin">Join</button></div>
       </div>
       <div id="syncActive" class="hide">
-        <p class="muted" style="margin-top:0">This device syncs with code</p>
-        <div class="code" id="syncCodeDisplay"></div>
-        <p class="muted" id="syncStatus"></p>
-        <div class="row"><button class="btn small" id="syncNowBtn">Sync now</button><button class="btn small alt" id="syncStop">Stop syncing here</button></div>
+        <button class="code" id="syncCodeDisplay" title="Tap to copy"></button>
+        <p class="muted small" id="syncStatus" style="margin:10px 2px 12px"></p>
+        <div class="btns two-up"><button class="btn small" id="syncNowBtn">Sync now</button><button class="btn small alt" id="syncStop">Stop syncing</button></div>
       </div>
     </div>
     <div class="panel">
       <h4>Backup</h4>
-      <p class="muted" style="margin-top:0">Save everything, photos included, as one file. Restoring adds anything missing and keeps what's already here.</p>
-      <div class="row"><button class="btn small" id="exportBtn">Save a backup</button><label class="btn small alt" for="importFile">Restore a backup</label><input type="file" id="importFile" accept="application/json,.json" class="hide"></div>
+      <p class="muted">One file with everything in it, photos included. Restoring adds anything missing.</p>
+      <div class="btns two-up"><button class="btn small" id="exportBtn">Save a backup</button><label class="btn small alt" for="importFile">Restore</label><input type="file" id="importFile" accept="application/json,.json" class="hide"></div>
     </div>
     <div class="panel">
       <h4>About</h4>
-      <p class="muted" style="margin-top:0">Everything is kept on this device. Barcode details come from the public <a href="https://www.upcitemdb.com/" target="_blank" rel="noopener">UPCitemdb</a> database. JellyStash is a personal project and isn't made by, or connected to, any toy brand.</p>
-      <div class="row" style="margin-top:4px"><span class="pill" id="versionLine"></span><button class="btn small alt" id="introAgain">Show the intro</button><button class="btn small alt" id="checkUpdateBtn">Check for updates</button></div>
+      <div class="btns two-up"><button class="btn small alt" id="introAgain">Show the intro</button><button class="btn small alt" id="checkUpdateBtn">Check updates</button></div>
+      <p class="muted small" style="margin:14px 2px 0">Everything is kept on this device. Barcode details come from the public <a href="https://www.upcitemdb.com/" target="_blank" rel="noopener">UPCitemdb</a> database. JellyStash is a personal project and isn't made by, or connected to, any toy brand.</p>
+      <p class="muted small" style="margin:8px 2px 0" id="versionLine"></p>
     </div>
   </section>
 </main>
@@ -616,7 +623,7 @@ input.input[type="date"]::-webkit-calendar-picker-indicator{opacity:.6}
 <div class="busy" id="updating" style="z-index:100"><div><div class="spin"></div><span id="updatingText">Updating JellyStash</span><p class="muted small" id="updatingSub" style="margin:6px 0 0">This only takes a moment.</p></div></div>
 <script>
 "use strict";
-const VERSION="1.8.0";
+const VERSION="1.9.0";
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const LS={get(k,d){try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}},del(k){try{localStorage.removeItem(k)}catch(e){}}};
@@ -1932,6 +1939,7 @@ function paintSyncUI(){
   if(code){ $("#syncCodeDisplay").textContent=code; const t=LS.get("stash-last-sync",""); $("#syncStatus").textContent=lastSyncError||(t?"Last synced "+new Date(t).toLocaleString("en-GB",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"}):"Not synced yet.") }
   $("#versionLine").textContent="Version "+VERSION;
 }
+$("#syncCodeDisplay").onclick=async()=>{ const c=getSyncCode(); if(!c) return; try{ await navigator.clipboard.writeText(c); toast("Code copied") }catch(e){ toast("Type this code on the other device") } };
 $("#syncCreate").onclick=()=>{ LS.set("stash-sync-code",genSyncCode()); paintSyncUI(); syncNow() };
 $("#syncJoin").onclick=()=>{ const c=$("#syncEnter").value.trim().toUpperCase().replace(/\s+/g,""); if(c.length<4){ toast("That code looks too short"); return } LS.set("stash-sync-code",c); $("#syncEnter").value=""; paintSyncUI(); syncNow() };
 $("#syncNowBtn").onclick=()=>syncNow();
@@ -2159,7 +2167,7 @@ async function checkPhotos(){
   await checkPhotos();
   // colour for photos saved before colour detection existed
   (async()=>{ let n=0; for(const i of items){ const p=photosOf(i)[0]; if(p&&(!i.tint||i.tint.l==null)){ try{ i.tint=sampleTint(await loadImg(blobURL(p))); await dbPut(i); n++ }catch(e){} } } if(n) render() })();
-  if(getSyncCode()) syncNow(true);
+  setTimeout(()=>{ if(getSyncCode()) syncNow(true) },1200);
   document.addEventListener("visibilitychange",()=>{ if(document.visibilityState==="visible"&&getSyncCode()) syncNow(true) });
   if(navigator.storage&&navigator.storage.persist) navigator.storage.persist().catch(()=>{});
 })();
@@ -2214,7 +2222,7 @@ if("serviceWorker" in navigator){
   let reloaded=false;
   navigator.serviceWorker.addEventListener("controllerchange",()=>{ if(updatingTo&&!reloaded){ reloaded=true; location.reload() } });
 }
-checkForUpdate();
+setTimeout(()=>checkForUpdate(),2500);
 document.addEventListener("visibilitychange",()=>{ if(document.visibilityState==="visible") checkForUpdate() });
 setInterval(()=>checkForUpdate(),15*60*1000);
 </script>

@@ -11,3 +11,6 @@
 
 /version.json
   Cache-Control: no-store
+
+/vendor/*
+  Cache-Control: public, max-age=2592000
