@@ -49,10 +49,10 @@ img{display:block;max-width:100%}
 .iconbtn svg{width:22px;height:22px}
 
 .searchrow{display:flex;gap:8px;margin:0 0 10px}
-.search{flex:1;display:flex;align-items:center;gap:8px;background:var(--card);border-radius:16px;padding:0 14px;height:46px;box-shadow:0 2px 0 var(--line)}
+.search{flex:1;min-width:0;display:flex;align-items:center;gap:8px;background:var(--card);border-radius:16px;padding:0 14px;height:46px;box-shadow:0 2px 0 var(--line)}
 .search input{border:0;outline:0;background:none;flex:1;min-width:0;height:100%}
 .search svg{width:18px;height:18px;color:var(--ink2)}
-select.sort{height:46px;border:0;border-radius:16px;background:var(--card);padding:0 12px;box-shadow:0 2px 0 var(--line);font-weight:600;color:var(--ink)}
+select.sort{flex:none;max-width:40%;height:46px;border:0;border-radius:16px;background:var(--card);padding:0 12px;box-shadow:0 2px 0 var(--line);font-weight:600;color:var(--ink)}
 
 .chips{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 12px;margin:0 -16px;padding-left:18px;padding-right:18px;scrollbar-width:none}
 .chips::-webkit-scrollbar{display:none}
@@ -235,6 +235,29 @@ input.input[type="date"]::-webkit-calendar-picker-indicator{opacity:.6}
 .busy .spin{width:54px;height:54px;border-radius:50%;border:6px solid var(--line);border-top-color:var(--pink);margin:0 auto 14px;animation:spin .8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 
+.nudge{background:var(--card);border-radius:22px;padding:14px 16px;margin:0 0 12px;box-shadow:0 3px 0 var(--line);border-left:6px solid var(--butter)}
+.nudge.sync{border-left-color:var(--sky)}
+.nudge b{display:block;font:700 19px/1.15 var(--display);margin-bottom:2px}
+.nudge p{margin:0 0 10px;color:var(--ink2);font-size:14.5px}
+.nudge .row{gap:8px}
+.spot{display:flex;align-items:center;gap:14px;width:100%;text-align:left;border-radius:24px;padding:12px;margin:0 0 12px;background:var(--tint,#EADFFF)}
+.spot .pic{width:84px;height:84px;border-radius:20px;overflow:hidden;flex:none;background:rgba(255,255,255,.5);display:grid;place-items:center;font:800 40px var(--display);color:rgba(43,30,79,.3)}
+.spot .pic img{width:100%;height:100%;object-fit:cover}
+.spot small{display:block;font-weight:800;font-size:12.5px;letter-spacing:.05em;text-transform:uppercase;opacity:.75}
+.spot b{display:block;font:800 22px/1.05 var(--display);margin:2px 0}
+.spot span{font-weight:600;font-size:14px;opacity:.8}
+.spot.party{background:linear-gradient(135deg,var(--butter),#FFB3CE)}
+.chip .sw{display:inline-block;width:14px;height:14px;border-radius:50%;margin-right:6px;vertical-align:-2px;box-shadow:inset 0 0 0 1.5px rgba(43,30,79,.18)}
+.sectionlabel{font:800 18px var(--display);margin:6px 4px -4px}
+.linkbox{background:var(--card);border-radius:14px;padding:12px 14px;font-weight:700;word-break:break-all;margin:0 0 12px;border:2px solid var(--line)}
+#crop{position:fixed;inset:0;z-index:75;background:#140E26;display:none;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:calc(var(--safe-t) + 16px) 16px calc(var(--safe-b) + 20px);touch-action:none}
+#crop.open{display:flex}
+#crop .vp{position:relative;width:min(88vw,62vh,520px);aspect-ratio:1;border-radius:32px;overflow:hidden;background:#000;touch-action:none;cursor:grab}
+#crop .vp img{position:absolute;left:0;top:0;transform-origin:0 0;max-width:none;user-select:none;-webkit-user-drag:none;pointer-events:none}
+#crop .vp::after{content:"";position:absolute;inset:0;border-radius:32px;box-shadow:inset 0 0 0 3px rgba(255,255,255,.6);pointer-events:none}
+#crop .hint{color:#fff;opacity:.8;font-weight:700;text-align:center;margin:0}
+#crop .row{gap:12px;width:min(88vw,520px)}
+#crop .row .btn{flex:1}
 @media (min-width:700px){
   .grid{grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:22px 18px}
 }
@@ -268,9 +291,11 @@ input.input[type="date"]::-webkit-calendar-picker-indicator{opacity:.6}
   <section id="vList">
     <header class="top">
       <h1 class="brand" id="brand" aria-label="JellyStash"></h1>
-      <button class="iconbtn" id="checkTagBtn" aria-label="Check a tag in a shop" title="Check a tag"><svg><use href="#i-scan"/></svg></button>
+      <div class="row" style="gap:8px"><button class="iconbtn" id="wishShareBtn" aria-label="Share the wishlist" title="Share the wishlist"><svg><use href="#i-share"/></svg></button><button class="iconbtn" id="checkTagBtn" aria-label="Check a tag in a shop" title="Check a tag"><svg><use href="#i-scan"/></svg></button></div>
     </header>
     <p class="sub" id="listSub"></p>
+    <div id="nudges"></div>
+    <div id="spotlight"></div>
     <button class="btn ink wide show-cta hide" id="startParade"><svg><use href="#i-play"/></svg>Show the Jellies</button>
     <div class="searchrow" id="searchRow">
       <label class="search"><svg><use href="#i-search"/></svg><input id="q" type="search" placeholder="Find a friend" autocomplete="off" aria-label="Search"></label>
@@ -392,6 +417,13 @@ input.input[type="date"]::-webkit-calendar-picker-indicator{opacity:.6}
       <div class="field"><label for="fPrice">Price (£)</label><input class="input" id="fPrice" inputmode="decimal" placeholder="0.00" autocomplete="off"></div>
     </div>
     <div class="field"><label for="fFrom">Where from</label><input class="input" id="fFrom" list="fromList" placeholder="Birthday present, a shop, a trip…" autocomplete="off"></div>
+    <div class="field"><label for="fColour">Colour</label><select class="input" id="fColour"><option value="">Auto</option></select><p class="hint">Worked out from the photo. Pick one if it guessed wrong.</p></div>
+    <p class="sectionlabel">Collector details</p>
+    <div class="two">
+      <div class="field"><label for="fTags">Tags</label><select class="input" id="fTags"><option value="">Not sure</option><option>Tags on</option><option>Tags off</option><option>Tags kept safe</option></select></div>
+      <div class="field"><label for="fCond">Condition</label><select class="input" id="fCond"><option value="">Not sure</option><option>Brand new</option><option>Like new</option><option>Well loved</option></select></div>
+    </div>
+    <div class="field"><label for="fHome">Where it lives</label><input class="input" id="fHome" list="homeList" placeholder="Bed, shelf, school bag…" autocomplete="off"></div>
     <div class="toggles">
       <button type="button" class="toggle" id="fFav" aria-pressed="false"><svg width="16" height="16"><use href="#i-heart"/></svg>Favourite</button>
       <button type="button" class="toggle" id="fRetired" aria-pressed="false">Retired design</button>
@@ -405,6 +437,7 @@ input.input[type="date"]::-webkit-calendar-picker-indicator{opacity:.6}
 <datalist id="rangeList"></datalist>
 <datalist id="kindList"></datalist>
 <datalist id="fromList"></datalist>
+<datalist id="homeList"></datalist>
 
 <!-- meet a friend -->
 <div class="meet" id="meet" role="dialog" aria-modal="true" aria-label="Friend details">
@@ -435,12 +468,22 @@ input.input[type="date"]::-webkit-calendar-picker-indicator{opacity:.6}
   <div class="scanbot"><button class="btn alt small" id="scanManual">Type the number</button><button class="btn small" id="scanClose">Close</button></div>
 </div>
 
+<div id="crop" aria-hidden="true">
+  <p class="hint">Pinch to zoom, drag to move</p>
+  <div class="vp" id="cropVp"><img id="cropImg" alt=""></div>
+  <div class="row"><button class="btn alt" id="cropCancel">Cancel</button><button class="btn" id="cropUse">Use photo</button></div>
+</div>
+<div class="sheet" id="shareSheet" role="dialog" aria-modal="true" aria-labelledby="shareTitle">
+  <div class="grab"></div>
+  <h3 id="shareTitle">Share the wishlist</h3>
+  <div id="shareBody"></div>
+</div>
 <div class="busy" id="busy"><div><div class="spin"></div><span id="busyText">Looking it up</span></div></div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <div class="busy" id="updating" style="z-index:100"><div><div class="spin"></div><span id="updatingText">Updating JellyStash</span><p class="muted small" id="updatingSub" style="margin:6px 0 0">This only takes a moment.</p></div></div>
 <script>
 "use strict";
-const VERSION="1.1.2";
+const VERSION="1.2.0";
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const LS={get(k,d){try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}},del(k){try{localStorage.removeItem(k)}catch(e){}}};
@@ -499,8 +542,9 @@ function sampleTint(img){
   const n=32, c=document.createElement("canvas"); c.width=n; c.height=n;
   const x=c.getContext("2d",{willReadFrequently:true});
   // centre 60% of the picture, where the plush usually is
-  const sw=img.naturalWidth*.6, sh=img.naturalHeight*.6;
-  x.drawImage(img,(img.naturalWidth-sw)/2,(img.naturalHeight-sh)/2,sw,sh,0,0,n,n);
+  const W=img.naturalWidth||img.width, H=img.naturalHeight||img.height;
+  const sw=W*.6, sh=H*.6;
+  x.drawImage(img,(W-sw)/2,(H-sh)/2,sw,sh,0,0,n,n);
   const d=x.getImageData(0,0,n,n).data;
   // weight colourful pixels more so a pink bunny on a white bed still reads pink
   let r=0,g=0,b=0,wt=0;
@@ -509,15 +553,15 @@ function sampleTint(img){
     const sat=mx?(mx-mn)/mx:0, w=.15+sat*sat*3;
     r+=R*w; g+=G*w; b+=B*w; wt+=w;
   }
-  const [h,s]=rgbToHs(r/wt,g/wt,b/wt);
-  return {h:Math.round(h),s:Math.round(s*100)};
+  const [h,s,l]=rgbToHs(r/wt,g/wt,b/wt);
+  return {h:Math.round(h),s:Math.round(s*100),l:Math.round(l*100)};
 }
 function rgbToHs(r,g,b){
   r/=255;g/=255;b/=255; const mx=Math.max(r,g,b), mn=Math.min(r,g,b), l=(mx+mn)/2, d=mx-mn;
-  if(!d) return [260,0];
+  if(!d) return [260,0,l];
   const s=d/(1-Math.abs(2*l-1)); let h;
   if(mx===r) h=((g-b)/d)%6; else if(mx===g) h=(b-r)/d+2; else h=(r-g)/d+4;
-  h*=60; if(h<0) h+=360; return [h,s];
+  h*=60; if(h<0) h+=360; return [h,s,l];
 }
 function hashHue(str){ let h=0; for(const ch of String(str||"x")) h=(h*31+ch.charCodeAt(0))>>>0; return h%360 }
 function tintOf(i){
@@ -525,6 +569,24 @@ function tintOf(i){
   const s=Math.max(28,Math.min(62,t.s));
   return {soft:`hsl(${t.h} ${s}% 88%)`, mid:`hsl(${t.h} ${s}% 80%)`, ink:`hsl(${t.h} ${Math.min(55,s)}% 22%)`};
 }
+const COLOURS={Pink:"#FF9EC0",Red:"#E5484D",Orange:"#FF9F45",Yellow:"#FFD35A",Cream:"#F5E6C8",Brown:"#9A6B4A",Green:"#6CC08B",Blue:"#6FA8FF",Purple:"#A98BEA",White:"#FFFFFF",Grey:"#A7A3B3",Black:"#2B2533",Rainbow:"conic-gradient(#FF6B6B,#FFD35A,#6CC08B,#6FA8FF,#A98BEA,#FF6B6B)"};
+function autoColour(t){
+  if(!t||t.l==null) return "";
+  const {h,s,l}=t;
+  if(l<18) return "Black";
+  if(s<12) return l>80?"White":(l<26?"Black":"Grey");
+  if(h>=18&&h<52&&l<48) return "Brown";
+  if(h>=25&&h<68&&l>72&&s<60) return "Cream";
+  if(h>=345||h<12) return l>68?"Pink":"Red";
+  if(h<42) return "Orange";
+  if(h<68) return "Yellow";
+  if(h<165) return "Green";
+  if(h<250) return "Blue";
+  if(h<290) return "Purple";
+  return "Pink";
+}
+const colourOf=i=>i.colour||autoColour(i.tint);
+const swatch=c=>`<span class="sw" style="background:${COLOURS[c]||"#ccc"}"></span>`;
 const photosOf=i=>Array.isArray(i.photos)?i.photos.filter(Boolean):[];
 function picOf(i){ const p=photosOf(i)[0]; if(p) return blobURL(p); return i.refImage||"" }
 const initial=i=>esc(((i.nickname||i.name||"?").trim()[0]||"?").toUpperCase());
@@ -635,9 +697,10 @@ function currentList(){
   let list=listOf(view==="wish"?"wish":"parade");
   if(filter==="fav") list=list.filter(i=>i.fav);
   else if(filter==="retired") list=list.filter(i=>i.retired);
+  else if(filter.startsWith("c:")) list=list.filter(i=>colourOf(i)===filter.slice(2));
   else if(filter.startsWith("k:")) list=list.filter(i=>(i.kind||"Other")===filter.slice(2));
   else if(filter.startsWith("r:")) list=list.filter(i=>(i.range||"")===filter.slice(2));
-  if(q) list=list.filter(i=>[i.name,i.nickname,i.range,i.kind,i.code,i.barcode,i.from,i.notes].join(" ").toLowerCase().includes(q));
+  if(q) list=list.filter(i=>[i.name,i.nickname,i.range,i.kind,i.code,i.barcode,i.from,i.notes,i.home,colourOf(i),i.tags,i.condition].join(" ").toLowerCase().includes(q));
   const s=$("#sort").value, when=i=>i.adopted||(i.created?new Date(i.created).toISOString().slice(0,10):"");
   const nm=i=>(i.nickname||i.name||"").toLowerCase();
   const sizeIdx=i=>{ const k=SIZES.indexOf(i.size); return k<0?99:k };
@@ -658,9 +721,11 @@ function renderChips(){
   const favs=base.filter(i=>i.fav).length; if(favs) chips.push(["fav","Favourites",favs]);
   Object.entries(kinds).sort((a,b)=>b[1]-a[1]).forEach(([k,n])=>{ if(Object.keys(kinds).length>1||k!=="Other") chips.push(["k:"+k,plural(k),n]) });
   Object.entries(ranges).filter(([,n])=>n>1).sort((a,b)=>b[1]-a[1]).forEach(([r,n])=>chips.push(["r:"+r,r,n]));
+  const cols={}; base.forEach(i=>{ const c=colourOf(i); if(c) cols[c]=(cols[c]||0)+1 });
+  if(base.length>=4&&Object.keys(cols).length>1) Object.keys(COLOURS).forEach(c=>{ if(cols[c]) chips.push(["c:"+c,c,cols[c],c]) });
   const ret=base.filter(i=>i.retired).length; if(ret) chips.push(["retired","Retired",ret]);
   if(!chips.some(c=>c[0]===filter)) filter="all";
-  $("#chips").innerHTML=base.length<2?"":chips.map(([k,l,n])=>`<button class="chip" data-f="${esc(k)}" aria-pressed="${k===filter}">${esc(l)}<small>${n}</small></button>`).join("");
+  $("#chips").innerHTML=base.length<2?"":chips.map(([k,l,n,sw])=>`<button class="chip" data-f="${esc(k)}" aria-pressed="${k===filter}">${sw?swatch(sw):""}${esc(l)}<small>${n}</small></button>`).join("");
 }
 function cardHTML(i){
   const t=tintOf(i), pic=picOf(i);
@@ -696,7 +761,58 @@ function renderList(){
     e.innerHTML=`<h2>No one matches</h2><p>Try a different word or filter.</p><button class="btn alt" data-act="clear">Show everyone</button>`;
   }else e.classList.add("hide");
   $("#startParade").classList.toggle("hide",isWish||all.length<2);
+  const browsing=!isWish&&!$("#q").value.trim()&&filter==="all";
+  renderNudges(!isWish);
+  renderSpotlight(browsing?all:[]);
 }
+/* ---------- keeping her data safe ---------- */
+const isStandalone=()=>window.matchMedia&&matchMedia("(display-mode: standalone)").matches||navigator.standalone===true;
+const isIOS=()=>/iPhone|iPad|iPod/.test(navigator.userAgent)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1);
+const isMobile=()=>isIOS()||/Android/.test(navigator.userAgent);
+let installEvt=null;
+window.addEventListener("beforeinstallprompt",e=>{ e.preventDefault(); installEvt=e; if(view==="parade") renderList() });
+const snoozed=k=>Date.now()<(LS.get("stash-snooze-"+k,0)||0);
+const snooze=(k,days)=>LS.set("stash-snooze-"+k,Date.now()+days*86400000);
+function renderNudges(show){
+  const box=$("#nudges"); let h="";
+  if(show&&isMobile()&&!isStandalone()&&!snoozed("install")){
+    h+=`<div class="nudge"><b>Keep her Jellies safe</b><p>Add JellyStash to the Home Screen. Browsers can clear data from websites that haven't been opened for a while, but Home Screen apps keep it.</p><div class="row"><button class="btn small" data-n="install">${installEvt?"Install":"Show me how"}</button><button class="btn small alt" data-n="install-later">Later</button></div></div>`;
+  }
+  if(!h&&show&&listOf("parade").length>=5&&!getSyncCode()&&!snoozed("sync")){
+    h+=`<div class="nudge sync"><b>Back up her stash</b><p>Turn on sync and every Jelly and photo is saved online too, so nothing is lost if this device is.</p><div class="row"><button class="btn small" data-n="sync">Turn on sync</button><button class="btn small alt" data-n="sync-later">Later</button></div></div>`;
+  }
+  box.innerHTML=h;
+}
+$("#nudges").onclick=async e=>{
+  const n=e.target.closest("[data-n]")?.dataset.n; if(!n) return;
+  if(n==="install-later"){ snooze("install",3); renderList() }
+  else if(n==="sync-later"){ snooze("sync",7); renderList() }
+  else if(n==="sync"){ view="more"; render(); window.scrollTo({top:0}) }
+  else if(n==="install"){
+    if(installEvt){ installEvt.prompt(); try{ await installEvt.userChoice }catch(err){} installEvt=null; renderList(); return }
+    message({title:"Add to the Home Screen",lead:"",body:isIOS()
+      ?`<ol style="margin:0 0 6px;padding-left:22px;line-height:1.7;font-weight:600"><li>Open this page in <b>Safari</b></li><li>Tap the <b>Share</b> button (the square with an arrow)</li><li>Scroll down and tap <b>Add to Home Screen</b></li><li>Tap <b>Add</b>, then open JellyStash from its new icon</li></ol>`
+      :`<ol style="margin:0 0 6px;padding-left:22px;line-height:1.7;font-weight:600"><li>Open the browser menu (the three dots)</li><li>Tap <b>Install app</b> or <b>Add to Home screen</b></li><li>Open JellyStash from its new icon</li></ol>`,
+      actions:[{label:"Got it"}]});
+  }
+};
+
+/* ---------- a little delight ---------- */
+function renderSpotlight(all){
+  const box=$("#spotlight");
+  if(all.length<3){ box.innerHTML=""; return }
+  const now=new Date(), md=today().slice(5), yr=now.getFullYear();
+  const party=all.filter(i=>i.adopted&&i.adopted.slice(5)===md&&+i.adopted.slice(0,4)<yr);
+  const pick=arr=>{ let h=0; for(const ch of today()) h=(h*31+ch.charCodeAt(0))>>>0; return arr[h%arr.length] };
+  const withPics=all.filter(i=>picOf(i));
+  const jotd=pick(withPics.length?withPics:all);
+  const card=(i,kicker,line,cls)=>{ const t=tintOf(i), p=picOf(i);
+    return `<button class="spot ${cls||""}" data-id="${esc(i.id)}" style="--tint:${t.soft};color:${t.ink}"><span class="pic">${p?`<img src="${esc(p)}" alt="" referrerpolicy="no-referrer">`:initial(i)}</span><span><small>${esc(kicker)}</small><b>${esc(i.nickname||i.name||"A friend")}</b><span>${esc(line)}</span></span></button>` };
+  let h=party.map(i=>{ const y=yr-+i.adopted.slice(0,4); return card(i,"Happy stash-iversary!",`Joined the stash ${y} year${y===1?"":"s"} ago today`,"party") }).join("");
+  if(!party.some(p=>p.id===jotd.id)) h+=card(jotd,"Jelly of the day",jotd.adopted?`In the stash since ${fmtDate(jotd.adopted)}`:"Say hello!");
+  box.innerHTML=h;
+}
+$("#spotlight").onclick=e=>{ const b=e.target.closest(".spot"); if(!b) return; const i=items.find(x=>x.id===b.dataset.id); if(i) openMeet([i],0) };
 $("#empty").onclick=e=>{
   const a=e.target.closest("[data-act]")?.dataset.act; if(!a) return;
   if(a==="scan") scanToAdd("parade");
@@ -716,6 +832,7 @@ function render(){
   $("#startParade").classList.add("hide");
   $$(".tabs [data-view]").forEach(b=>{ if(b.dataset.view===view) b.setAttribute("aria-current","page"); else b.removeAttribute("aria-current") });
   $("#checkTagBtn").classList.toggle("hide",view!=="wish");
+  $("#wishShareBtn").classList.toggle("hide",view!=="wish");
   if(view==="parade"||view==="wish") renderList();
   else if(view==="stats") renderStats();
   else if(view==="more") paintSyncUI();
@@ -727,6 +844,7 @@ function refreshDatalists(){
   $("#rangeList").innerHTML=opts([...items.map(i=>i.range),...new Set(KNOWN_RANGES.map(r=>r[1]))]);
   $("#kindList").innerHTML=opts([...items.map(i=>i.kind),...new Set(KINDS.map(k=>k[1]))]);
   $("#fromList").innerHTML=opts(items.map(i=>i.from));
+  $("#homeList").innerHTML=opts(["Bed","Shelf","School bag","Toy box",...items.map(i=>i.home)]);
 }
 
 
@@ -898,6 +1016,8 @@ $("#scanClose").onclick=()=>{ scanCb=null; closeScanner() };
 $("#scanManual").onclick=()=>{ const c=scanCb; closeScanner(); if(c) promptBarcode(c) };
 
 /* ---------- the form ---------- */
+Object.keys(COLOURS).forEach(c=>{ const o=document.createElement("option"); o.value=c; o.textContent=c; $("#fColour").appendChild(o) });
+function paintAutoColour(){ const a=autoColour(editing&&editing.tint); $("#fColour").options[0].textContent=a?`Auto (${a})`:"Auto"; }
 SIZES.forEach(s=>{ const o=document.createElement("option"); o.value=s; o.textContent=s; $("#fSize").appendChild(o) });
 function openForm(item,draft,banner,warn){
   const base=item?{...item,photos:photosOf(item).slice(),photoHashes:(item.photoHashes||[]).slice()}:{id:null,status:"parade",name:"",nickname:"",range:"",kind:"",size:"",code:"",barcode:"",adopted:"",from:"",price:null,fav:false,retired:false,notes:"",photos:[],photoHashes:[],refImage:"",tint:null};
@@ -911,6 +1031,7 @@ function openForm(item,draft,banner,warn){
   $("#fCode").value=editing.code||""; $("#fBarcode").value=editing.barcode||"";
   $("#fDate").value=editing.adopted||""; $("#fPrice").value=editing.price!=null&&editing.price!==""?editing.price:"";
   $("#fFrom").value=editing.from||""; $("#fNotes").value=editing.notes||"";
+  $("#fColour").value=editing.colour||""; $("#fTags").value=editing.tags||""; $("#fCond").value=editing.condition||""; $("#fHome").value=editing.home||""; paintAutoColour();
   $("#fFav").setAttribute("aria-pressed",!!editing.fav); $("#fRetired").setAttribute("aria-pressed",!!editing.retired);
   $("#fDelete").classList.toggle("hide",!item);
   paintStatus(); paintPhotos(); $("#fCodeHint").textContent=editing.code?formCodeHint(editing.code):"";
@@ -935,15 +1056,54 @@ $("#fPhotos").onclick=e=>{
 };
 $("#fPhotoInput").onchange=async e=>{
   const f=e.target.files&&e.target.files[0]; if(!f) return;
+  let res;
+  try{ res=await cropPhoto(f) }catch(err){ toast("That photo couldn't be read. Try another."); return }
+  if(!res) return;
   busy(true,"Saving the photo");
   try{
-    const {blob,tint}=await processPhoto(f);
-    editing.photos.push(blob); editing.photoHashes.push(await hashBlob(blob));
-    if(editing.photos.length===1) editing.tint=tint;
+    editing.photos.push(res.blob); editing.photoHashes.push(await hashBlob(res.blob));
+    if(editing.photos.length===1){ editing.tint=res.tint; paintAutoColour() }
     paintPhotos();
-  }catch(err){ toast("That photo couldn't be read. Try another.") }
+  }catch(err){ toast("That photo couldn't be saved. Try another.") }
   busy(false);
 };
+/* square crop: drag to move, pinch (or scroll) to zoom */
+function cropPhoto(file){
+  return new Promise(async(resolve,reject)=>{
+    const url=URL.createObjectURL(file);
+    let img; try{ img=await loadImg(url) }catch(e){ URL.revokeObjectURL(url); return reject(e) }
+    // work from a copy no bigger than 2000px so older phones cope
+    const k=Math.min(1,2000/Math.max(img.naturalWidth,img.naturalHeight));
+    const src=document.createElement("canvas"); src.width=Math.round(img.naturalWidth*k); src.height=Math.round(img.naturalHeight*k);
+    src.getContext("2d").drawImage(img,0,0,src.width,src.height); URL.revokeObjectURL(url);
+    const ov=$("#crop"), vp=$("#cropVp"), el=$("#cropImg");
+    el.src=src.toDataURL("image/jpeg",.9);
+    ov.classList.add("open"); ov.setAttribute("aria-hidden","false"); lockBody();
+    await new Promise(r=>requestAnimationFrame(r));
+    const V=vp.clientWidth, W=src.width, H=src.height, minS=V/Math.min(W,H);
+    let sc=minS, x=(V-W*sc)/2, y=(V-H*sc)/2;
+    const clamp=()=>{ sc=Math.max(minS,Math.min(minS*5,sc)); x=Math.min(0,Math.max(V-W*sc,x)); y=Math.min(0,Math.max(V-H*sc,y)) };
+    const paint=()=>{ el.style.width=W+"px"; el.style.height=H+"px"; el.style.transform=`translate(${x}px,${y}px) scale(${sc})` };
+    const zoomAt=(f,cx,cy)=>{ const ns=Math.max(minS,Math.min(minS*5,sc*f)), r=ns/sc; x=cx-(cx-x)*r; y=cy-(cy-y)*r; sc=ns; clamp(); paint() };
+    clamp(); paint();
+    const pts=new Map(); let last=null;
+    const rel=e=>{ const b=vp.getBoundingClientRect(); return {x:e.clientX-b.left,y:e.clientY-b.top} };
+    const gesture=()=>{ const p=[...pts.values()]; if(p.length===1) return {x:p[0].x,y:p[0].y,d:0}; return {x:(p[0].x+p[1].x)/2,y:(p[0].y+p[1].y)/2,d:Math.hypot(p[0].x-p[1].x,p[0].y-p[1].y)} };
+    vp.onpointerdown=e=>{ vp.setPointerCapture(e.pointerId); pts.set(e.pointerId,rel(e)); last=gesture() };
+    vp.onpointermove=e=>{ if(!pts.has(e.pointerId)) return; pts.set(e.pointerId,rel(e)); const g=gesture();
+      if(last){ x+=g.x-last.x; y+=g.y-last.y; if(g.d&&last.d){ zoomAt(g.d/last.d,g.x,g.y) } else { clamp(); paint() } } last=g };
+    vp.onpointerup=vp.onpointercancel=e=>{ pts.delete(e.pointerId); last=pts.size?gesture():null };
+    vp.onwheel=e=>{ e.preventDefault(); const p=rel(e); zoomAt(e.deltaY<0?1.1:1/1.1,p.x,p.y) };
+    const done=out=>{ ov.classList.remove("open"); ov.setAttribute("aria-hidden","true"); unlockBody(); vp.onpointerdown=vp.onpointermove=vp.onpointerup=vp.onpointercancel=vp.onwheel=null; el.removeAttribute("src"); resolve(out) };
+    $("#cropCancel").onclick=()=>done(null);
+    $("#cropUse").onclick=async()=>{
+      const N=1000, c=document.createElement("canvas"); c.width=N; c.height=N;
+      c.getContext("2d").drawImage(src,-x/sc,-y/sc,V/sc,V/sc,0,0,N,N);
+      const blob=await new Promise(r=>c.toBlob(r,"image/jpeg",.82));
+      done({blob,tint:sampleTint(c)});
+    };
+  });
+}
 function formCodeHint(v){
   const dup=byCode(v).filter(d=>d.id!==editing.id);
   if(dup.length) return `Also on: ${dup.map(d=>d.nickname||d.name||"another friend").join(", ")}.`;
@@ -985,6 +1145,7 @@ $("#fSave").onclick=async()=>{
     range:$("#fRange").value.trim(), kind:$("#fKind").value.trim()||findKind(name),
     size:$("#fSize").value, code:$("#fCode").value.trim().toUpperCase(), barcode:normBarcode($("#fBarcode").value),
     adopted:$("#fDate").value, price:price?Number(price):null, from:$("#fFrom").value.trim(), notes:$("#fNotes").value.trim(),
+    colour:$("#fColour").value, tags:$("#fTags").value, condition:$("#fCond").value, home:$("#fHome").value.trim(),
     fav:$("#fFav").getAttribute("aria-pressed")==="true", retired:$("#fRetired").getAttribute("aria-pressed")==="true",
     created:editing.created||Date.now(), updated:Date.now()
   };
@@ -1030,7 +1191,8 @@ function paintMeet(){
   const wish=live.status==="wish";
   const facts=[
     ["Range",live.range],["Kind",live.kind],["Size",live.size],
-    [wish?"Wished for since":"Joined",fmtDate(live.adopted)],["From",live.from],
+    ["Colour",colourOf(live)],
+    [wish?"Wished for since":"Joined",fmtDate(live.adopted)],["From",live.from],["Lives",live.home],["Tags",live.tags],["Condition",live.condition],
     ["Price",live.price!=null&&live.price!==""?money(live.price):""],["Barcode",live.barcode]
   ].filter(f=>f[1]);
   $("#meetInner").innerHTML=`
@@ -1192,7 +1354,73 @@ $("#syncJoin").onclick=()=>{ const c=$("#syncEnter").value.trim().toUpperCase().
 $("#syncNowBtn").onclick=()=>syncNow();
 $("#syncStop").onclick=()=>message({title:"Stop syncing on this device?",lead:"Everything stays here. This device just stops sharing changes.",actions:[{label:"Stop syncing",ink:true,run:()=>{ LS.del("stash-sync-code"); lastSyncError=""; paintSyncUI() }},{label:"Keep syncing",alt:true}]});
 let syncTimer=null;
-function scheduleSync(){ if(!getSyncCode()) return; clearTimeout(syncTimer); syncTimer=setTimeout(()=>syncNow(true),3000) }
+/* ---------- shareable wishlist ---------- */
+const getShare=()=>LS.get("stash-wishshare",null);
+const shareURL=sh=>location.origin+"/w/"+sh.id;
+const randStr=n=>{ const a="abcdefghijkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789", r=new Uint8Array(n); crypto.getRandomValues(r); return [...r].map(b=>a[b%a.length]).join("") };
+const thumbCache=new Map();
+async function thumbOf(i){
+  const p=photosOf(i)[0], h=(i.photoHashes||[])[0]; if(!p) return "";
+  if(h&&thumbCache.has(h)) return thumbCache.get(h);
+  const img=await loadImg(blobURL(p)), S=360, c=document.createElement("canvas"); c.width=S; c.height=S;
+  const k=Math.max(S/img.naturalWidth,S/img.naturalHeight), w=img.naturalWidth*k, hh=img.naturalHeight*k;
+  c.getContext("2d").drawImage(img,(S-w)/2,(S-hh)/2,w,hh);
+  const d=c.toDataURL("image/jpeg",.72); if(h) thumbCache.set(h,d); return d;
+}
+let publishTimer=null, publishing=false;
+function schedulePublish(){ if(!getShare()) return; clearTimeout(publishTimer); publishTimer=setTimeout(()=>publishWishlist(true),2500) }
+async function publishWishlist(silent){
+  const sh=getShare(); if(!sh||publishing) return false; publishing=true;
+  try{
+    const wl=listOf("wish"), out=[];
+    for(const i of wl) out.push({id:i.id,name:i.nickname||i.name||"",size:i.size||"",range:i.range||"",kind:i.kind||"",code:i.code||"",thumb:await thumbOf(i).catch(()=>""),ref:photosOf(i).length?"":(i.refImage||"")});
+    const r=await fetch("/api/wishlist?id="+sh.id,{method:"PUT",headers:{"content-type":"application/json"},body:JSON.stringify({key:sh.key,title:sh.title,items:out})});
+    if(!r.ok) throw new Error("status "+r.status);
+    LS.set("stash-wishshare",{...sh,publishedAt:new Date().toISOString()});
+    if(!silent) toast("Wishlist link updated");
+    return true;
+  }catch(e){ if(!silent) toast("Couldn't update the shared wishlist"); return false }
+  finally{ publishing=false; if($("#shareSheet").classList.contains("open")) paintShare() }
+}
+function paintShare(){
+  const sh=getShare(), b=$("#shareBody");
+  if(!sh){
+    b.innerHTML=`<p class="lead">Make a link family can open to see the wishlist, with photos and sizes. They can quietly mark a Jelly as "I'm getting this one" so nobody doubles up. This app never shows who reserved what.</p>
+      <div class="field" style="margin-bottom:14px"><label for="shareTitleIn">Title on the page</label><input class="input" id="shareTitleIn" value="Jelly wishlist" maxlength="80"></div>
+      <button class="btn wide" id="shareCreate">Create the link</button>`;
+    $("#shareCreate").onclick=async()=>{
+      LS.set("stash-wishshare",{id:randStr(12),key:randStr(28),title:$("#shareTitleIn").value.trim()||"Jelly wishlist"});
+      busy(true,"Making the link"); const ok=await publishWishlist(true); busy(false);
+      if(!ok){ LS.del("stash-wishshare"); toast("Couldn't make the link. Are you online?") }
+      else { scheduleSync(); paintShare() }
+    };
+    return;
+  }
+  const url=shareURL(sh), when=sh.publishedAt?new Date(sh.publishedAt).toLocaleString("en-GB",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"}):"not yet";
+  b.innerHTML=`<p class="lead">Send this link to family. It updates by itself whenever the wishlist changes. Best kept for grown-ups, so the surprise lasts.</p>
+    <div class="linkbox">${esc(url)}</div>
+    <div class="form">
+      <button class="btn wide" id="shareSend"><svg><use href="#i-share"/></svg>Send the link</button>
+      <button class="btn wide alt" id="shareOpen">Preview the page</button>
+      <div class="field"><label for="shareTitleIn">Title on the page</label><div class="inline"><input class="input" id="shareTitleIn" value="${esc(sh.title||"")}" maxlength="80"><button class="btn small ink" id="shareRename">Save</button></div></div>
+      <p class="muted small" style="margin:0">Last updated ${esc(when)}.</p>
+      <button class="danger" id="shareStop">Stop sharing</button>
+    </div>`;
+  $("#shareSend").onclick=async()=>{
+    if(navigator.share){ try{ await navigator.share({title:sh.title,text:"Here's the Jelly wishlist:",url}); return }catch(e){ if(e&&e.name==="AbortError") return } }
+    try{ await navigator.clipboard.writeText(url); toast("Link copied") }catch(e){ prompt("Copy this link",url) }
+  };
+  $("#shareOpen").onclick=()=>window.open(url,"_blank","noopener");
+  $("#shareRename").onclick=async()=>{ LS.set("stash-wishshare",{...getShare(),title:$("#shareTitleIn").value.trim()||"Jelly wishlist"}); await publishWishlist(); scheduleSync() };
+  $("#shareStop").onclick=()=>message({title:"Stop sharing the wishlist?",lead:"The link will stop working for everyone, and any reservations are forgotten.",actions:[
+    {label:"Stop sharing",ink:true,run:async()=>{
+      try{ await fetch("/api/wishlist?id="+sh.id+"&key="+encodeURIComponent(sh.key),{method:"DELETE"}) }catch(e){}
+      LS.del("stash-wishshare"); LS.set("stash-wishshare-stopped",Date.now()); scheduleSync(); toast("Wishlist no longer shared"); paintShare();
+    }},{label:"Keep sharing",alt:true}]});
+}
+$("#wishShareBtn").onclick=()=>{ paintShare(); showSheet("#shareSheet") };
+
+function scheduleSync(){ schedulePublish(); if(!getSyncCode()) return; clearTimeout(syncTimer); syncTimer=setTimeout(()=>syncNow(true),3000) }
 const uploadedSet=c=>new Set(LS.get("stash-uploaded-"+c,[]));
 const saveUploaded=(c,s)=>LS.set("stash-uploaded-"+c,[...s]);
 let syncing=false, syncAgain=false;
@@ -1205,6 +1433,9 @@ async function syncNow(silent){
     const res=await fetch("/api/sync?code="+encodeURIComponent(code)); if(!res.ok) throw new Error("status "+res.status);
     stage="reading"; const data=await res.json();
     const remote=data.found===false?[]:(data.items||[]);
+    // share link settings travel with the stash, so any synced device can keep it up to date
+    const stoppedAt=LS.get("stash-wishshare-stopped",0);
+    if(data.wishShare&&!getShare()&&!(stoppedAt&&Date.parse(data.syncedAt||0)<stoppedAt)) LS.set("stash-wishshare",data.wishShare);
     const tb=new Map(getTombstones().map(t=>[t.id,t])); (data.tombstones||[]).forEach(t=>{ if(!tb.has(t.id)) tb.set(t.id,t) });
     const cutoff=Date.now()-90*86400000;
     for(const raw of remote){
@@ -1234,7 +1465,7 @@ async function syncNow(silent){
     }
     saveUploaded(code,up);
     stage="saving";
-    const put=await fetch("/api/sync?code="+encodeURIComponent(code),{method:"PUT",headers:{"content-type":"application/json"},body:JSON.stringify({app:"jellystash",format:1,syncedAt:new Date().toISOString(),items:out,tombstones:tombs})});
+    const put=await fetch("/api/sync?code="+encodeURIComponent(code),{method:"PUT",headers:{"content-type":"application/json"},body:JSON.stringify({app:"jellystash",format:1,syncedAt:new Date().toISOString(),wishShare:getShare()?{id:getShare().id,key:getShare().key,title:getShare().title}:null,items:out,tombstones:tombs})});
     if(!put.ok) throw new Error("status "+put.status);
     LS.set("stash-last-sync",new Date().toISOString()); lastSyncError="";
     render();
@@ -1285,6 +1516,8 @@ $("#importFile").onchange=async e=>{
   $("#sort").value=LS.get("stash-sort","new");
   try{ await openDB(); items=await dbAll() }catch(e){ toast("Storage isn't available in this browser mode") }
   render();
+  // one-off: older photos were saved before colour detection, so work their colour out now
+  (async()=>{ let n=0; for(const i of items){ const p=photosOf(i)[0]; if(p&&(!i.tint||i.tint.l==null)){ try{ i.tint=sampleTint(await loadImg(blobURL(p))); await dbPut(i); n++ }catch(e){} } } if(n) render() })();
   if(getSyncCode()) syncNow(true);
   document.addEventListener("visibilitychange",()=>{ if(document.visibilityState==="visible"&&getSyncCode()) syncNow(true) });
   if(navigator.storage&&navigator.storage.persist) navigator.storage.persist().catch(()=>{});

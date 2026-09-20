@@ -21,8 +21,18 @@ manifest.webmanifest     PWA manifest
 functions/api/lookup.js  barcode lookup via UPCitemdb, cached in R2 under upc/
 functions/api/sync.js    sync manifest per shared code
 functions/api/photo.js   content-addressed photo storage for sync
+functions/api/wishlist.js  shareable wishlist: publish, read, reserve (R2 under wish/)
+wish.html                the family wishlist page, served at /w/<id> via _redirects
 vendor/                  ZBar WASM (LGPL-2.1+, unmodified)
 ```
+
+## Features added in 1.2
+
+- **Keeping data safe:** a banner asks for Add to Home Screen when opened in a browser (browsers can clear website data after a period without use), and one asks to turn on sync once there are 5 or more Jellies. One banner at a time, each can be snoozed.
+- **Shareable wishlist:** the share button on the Wishlist makes a link (/w/<id>) with photos and sizes. Family can reserve a Jelly; the app itself never fetches reservations. The link updates itself when the wishlist changes, and its settings travel with sync.
+- **Delight:** Jelly of the day, stash-iversaries, and colour filters (colour worked out from the photo, with a manual override).
+- **Photo crop:** every photo goes through a square crop with drag and pinch.
+- **Collector details:** tags, condition, and where it lives.
 
 ## Hosting
 
