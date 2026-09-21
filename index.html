@@ -267,7 +267,13 @@ input.input[type="date"]::-webkit-calendar-picker-indicator{opacity:.6}
 .linkbox{background:var(--card);border-radius:14px;padding:12px 14px;font-weight:700;word-break:break-all;margin:0 0 12px;border:2px solid var(--line)}
 #crop{position:fixed;inset:0;z-index:75;background:#140E26;display:none;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:calc(var(--safe-t) + 16px) 16px calc(var(--safe-b) + 20px);touch-action:none}
 #crop.open{display:flex}
-#crop .vp{position:relative;width:min(88vw,62vh,520px);aspect-ratio:1;border-radius:32px;overflow:hidden;background:#000;touch-action:none;cursor:grab}
+#crop .vp{position:relative;width:min(88vw,58vh,520px);aspect-ratio:1;border-radius:32px;overflow:hidden;touch-action:none;cursor:grab;
+  background:#fff conic-gradient(#e9e6ef 25%,#fff 0 50%,#e9e6ef 0 75%,#fff 0) 0 0/24px 24px}
+#crop .vp canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;display:none}
+#crop .vp.cutting img{visibility:hidden}
+#crop .vp.cutting canvas{display:block}
+.cuttoggle{height:46px;background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.25);color:#fff}
+.cuttoggle[aria-pressed="true"]{background:var(--mint);border-color:var(--mint);color:var(--ink)}
 #crop .vp img{position:absolute;left:0;top:0;transform-origin:0 0;max-width:none;user-select:none;-webkit-user-drag:none;pointer-events:none}
 #crop .vp::after{content:"";position:absolute;inset:0;border-radius:32px;box-shadow:inset 0 0 0 3px rgba(255,255,255,.6);pointer-events:none}
 #crop .hint{color:#fff;opacity:.8;font-weight:700;text-align:center;margin:0}
@@ -308,6 +314,8 @@ input.input[type="date"]::-webkit-calendar-picker-indicator{opacity:.6}
 .wtile{position:relative;flex:1 1 0;min-width:0;max-width:150px;text-align:center;touch-action:none;display:flex;flex-direction:column;justify-content:flex-end}
 .wtile .pic{width:var(--sc,100%);margin:0 auto;aspect-ratio:1;border-radius:18px;overflow:hidden;background:var(--tint,#EADFFF);display:grid;place-items:center;font:800 32px var(--display);color:rgba(43,30,79,.3)}
 .wtile .pic img{width:100%;height:100%;object-fit:contain;object-position:center bottom}
+.wtile .pic.cut{background:transparent;border-radius:0;overflow:visible}
+.wtile .pic.cut img{filter:drop-shadow(0 6px 5px rgba(43,30,79,.18))}
 .wtile .nm{max-width:100%;height:17px;line-height:17px;font-size:11.5px;font-weight:700;margin-top:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--ink2)}
 .wtile.drag{opacity:.25}
 .wtile.gap{opacity:.35}
@@ -560,8 +568,9 @@ input.input[type="date"]::-webkit-calendar-picker-indicator{opacity:.6}
 </div>
 
 <div id="crop" aria-hidden="true">
-  <p class="hint">Pinch to zoom, drag to move</p>
-  <div class="vp" id="cropVp"><img id="cropImg" alt=""></div>
+  <p class="hint">The whole photo fits by default. Pinch to zoom in if you like.</p>
+  <div class="vp" id="cropVp"><img id="cropImg" alt=""><canvas id="cropPreview"></canvas></div>
+  <button class="toggle cuttoggle" id="cropCut" aria-pressed="false">✂ Cut out the background</button>
   <div class="row"><button class="btn alt" id="cropCancel">Cancel</button><button class="btn" id="cropUse">Use photo</button></div>
 </div>
 <div class="sheet" id="shareSheet" role="dialog" aria-modal="true" aria-labelledby="shareTitle">
@@ -623,7 +632,7 @@ input.input[type="date"]::-webkit-calendar-picker-indicator{opacity:.6}
 <div class="busy" id="updating" style="z-index:100"><div><div class="spin"></div><span id="updatingText">Updating JellyStash</span><p class="muted small" id="updatingSub" style="margin:6px 0 0">This only takes a moment.</p></div></div>
 <script>
 "use strict";
-const VERSION="1.9.3";
+const VERSION="1.10.0";
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const LS={get(k,d){try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}},del(k){try{localStorage.removeItem(k)}catch(e){}}};
@@ -722,9 +731,11 @@ function sampleTint(img){
   let r=0,g=0,b=0,wt=0;
   for(let i=0;i<d.length;i+=4){
     const R=d[i],G=d[i+1],B=d[i+2], mx=Math.max(R,G,B), mn=Math.min(R,G,B);
+    if(d[i+3]<200) continue;   // transparent (cut-out) pixels say nothing about the Jelly
     const sat=mx?(mx-mn)/mx:0, w=.15+sat*sat*3;
     r+=R*w; g+=G*w; b+=B*w; wt+=w;
   }
+  if(!wt) return {h:260,s:0,l:90};
   const [h,s,l]=rgbToHs(r/wt,g/wt,b/wt);
   return {h:Math.round(h),s:Math.round(s*100),l:Math.round(l*100)};
 }
@@ -940,7 +951,7 @@ function renderWall(){
     const row=list.slice(k,k+perRow);
     h+=`<div class="shelf"><div class="row">${row.map(i=>{
       const t=tintOf(i), p=picOf(i);
-      return `<div class="wtile" data-id="${esc(i.id)}"><div class="pic" style="--tint:${t.soft};--sc:${Math.round(sizeScale(i)*100)}%">${p?`<img src="${esc(p)}" alt="" referrerpolicy="no-referrer">`:esc(initial(i))}</div><div class="nm">${esc(i.nickname||i.name||"")}</div></div>`;
+      return `<div class="wtile" data-id="${esc(i.id)}"><div class="pic${i.cutout&&photosOf(i).length?" cut":""}" style="--tint:${t.soft};--sc:${Math.round(sizeScale(i)*100)}%">${p?`<img src="${esc(p)}" alt="" referrerpolicy="no-referrer">`:esc(initial(i))}</div><div class="nm">${esc(i.nickname||i.name||"")}</div></div>`;
     }).join("")}${Array.from({length:perRow-row.length},()=>'<div class="wtile" style="visibility:hidden"></div>').join("")}</div><div class="plank"></div></div>`;
   }
   stage.innerHTML=h||`<p class="wallhint">Add a Jelly and it appears on the shelf.</p>`;
@@ -1020,7 +1031,7 @@ $("#wallPoster").onclick=async()=>{
       if(col===0){ x.fillStyle="#DCCDB4"; x.fillRect(pad-16,ty+tile+56,W-(pad-16)*2,12) }
       const t=tintOf(i);
       x.save(); roundRect(x,tx,ty,tile,tile,tile*.16); x.clip();
-      x.fillStyle=t.soft; x.fillRect(tx,ty,tile,tile);
+      if(!(i.cutout&&photosOf(i).length)){ x.fillStyle=t.soft; x.fillRect(tx,ty,tile,tile) }
       const p=photosOf(i)[0];
       if(p){ try{ const img=await loadImg(blobURL(p)); const s=Math.min(tile/img.naturalWidth,tile/img.naturalHeight), w=img.naturalWidth*s, h=img.naturalHeight*s; x.drawImage(img,tx+(tile-w)/2,ty+tile-h,w,h) }catch(e){} }
       else { x.fillStyle="rgba(43,30,79,.28)"; x.font=`800 ${Math.round(tile*.4)}px "Baloo 2", sans-serif`; x.textAlign="center"; x.textBaseline="middle"; x.fillText((i.nickname||i.name||"?").trim()[0].toUpperCase(),tx+tile/2,ty+tile/2); x.textBaseline="alphabetic" }
@@ -1612,7 +1623,7 @@ function paintStatus(){
 $$("#formSheet .seg button").forEach(b=>b.onclick=()=>{ editing.status=b.dataset.status; if(editing.status==="parade"&&!$("#fDate").value) $("#fDate").value=today(); paintStatus() });
 function paintPhotos(){
   const ph=editing.photos;
-  let h=ph.map((p,k)=>`<div class="slot filled"><img src="${blobURL(p)}" alt=""><button class="x" data-rm="${k}" aria-label="Remove photo">×</button></div>`).join("");
+  let h=ph.map((p,k)=>`<div class="slot filled" data-reframe="${k}"><img src="${blobURL(p)}" alt=""><span class="ref">Tap to reframe</span><button class="x" data-rm="${k}" aria-label="Remove photo">×</button></div>`).join("");
   if(!ph.length&&editing.refImage) h+=`<div class="slot filled"><img src="${esc(editing.refImage)}" alt="" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"><span class="ref">Shop picture</span><button class="x" data-rmref="1" aria-label="Remove shop picture">×</button></div>`;
   if(ph.length<4) h+=`<button type="button" class="slot" id="addPhoto"><span><svg width="28" height="28"><use href="#i-camera"/></svg><br>Take a photo</span></button><button type="button" class="slot" id="pickPhoto"><span><svg width="28" height="28"><use href="#i-gallery"/></svg><br>Choose from photos</span></button>`;
   if(!ph.length&&!editing.refImage) h+=`<button type="button" class="slot" id="findPhoto"><span><svg width="28" height="28"><use href="#i-search"/></svg><br>Find one online</span></button>`;
@@ -1620,6 +1631,17 @@ function paintPhotos(){
 }
 $("#fPhotos").onclick=e=>{
   if(e.target.closest("#addPhoto")){ $("#fPhotoInput").value=""; $("#fPhotoInput").click(); return }
+  const rf=e.target.closest("[data-reframe]");
+  if(rf&&!e.target.closest("[data-rm]")){
+    const k=+rf.dataset.reframe, old=editing.photos[k];
+    cropPhoto(new File([old],"photo",{type:old.type||"image/jpeg"})).then(async res=>{
+      if(!res) return;
+      editing.photos[k]=res.blob; editing.photoHashes[k]=await hashBlob(res.blob);
+      if(k===0){ editing.tint=res.tint; editing.cutout=!!res.cutout; paintAutoColour() }
+      paintPhotos();
+    }).catch(()=>toast("That photo couldn't be opened"));
+    return;
+  }
   if(e.target.closest("#pickPhoto")){ $("#fPhotoPick").value=""; $("#fPhotoPick").click(); return }
   if(e.target.closest("#findPhoto")){
     const n=($("#fName").value||$("#fNick").value||"").trim();
@@ -1629,7 +1651,7 @@ $("#fPhotos").onclick=e=>{
     toast("Save a picture you like, then tap Choose from photos");
     return;
   }
-  const rm=e.target.closest("[data-rm]"); if(rm){ const k=+rm.dataset.rm; editing.photos.splice(k,1); editing.photoHashes.splice(k,1); if(k===0) editing.tint=null; paintPhotos(); return }
+  const rm=e.target.closest("[data-rm]"); if(rm){ const k=+rm.dataset.rm; editing.photos.splice(k,1); editing.photoHashes.splice(k,1); if(k===0){ editing.tint=null; editing.cutout=false } paintPhotos(); return }
   if(e.target.closest("[data-rmref]")){ editing.refImage=""; paintPhotos() }
 };
 // camera gives one photo; the library can give several, each gets its own crop
@@ -1644,6 +1666,7 @@ async function addPhotoFiles(files){
     busy(true,"Saving the photo");
     try{
       editing.photos.push(res.blob); editing.photoHashes.push(await hashBlob(res.blob)); editing.photosLost=0;
+    if(editing.photos.length===1) editing.cutout=!!res.cutout;
       if(editing.photos.length===1){ editing.tint=res.tint; paintAutoColour() }
       paintPhotos();
     }catch(err){ toast("That photo couldn't be saved. Try another.") }
@@ -1652,25 +1675,85 @@ async function addPhotoFiles(files){
 }
 $("#fPhotoInput").onchange=e=>addPhotoFiles(e.target.files);
 $("#fPhotoPick").onchange=e=>addPhotoFiles(e.target.files);
-/* square crop: drag to move, pinch (or scroll) to zoom */
+/* ---------- background cut-out ----------
+   Product photos sit on a plain (usually white) background. Starting from the
+   edges, flood-fill every pixel close to the edge colour and make it transparent,
+   then soften the outline. Photos on busy backgrounds are left alone. */
+function edgeInfo(d,N){
+  let r=0,g=0,b=0,n=0; const px=[];
+  const at=(x,y)=>{ const i=(y*N+x)*4; if(d[i+3]<10) return; px.push([d[i],d[i+1],d[i+2]]); r+=d[i];g+=d[i+1];b+=d[i+2];n++ };
+  for(let k=0;k<N;k+=4){ at(k,0); at(k,N-1); at(0,k); at(N-1,k) }
+  if(!n) return null;
+  r/=n; g/=n; b/=n;
+  const dev=px.reduce((m,p)=>m+Math.hypot(p[0]-r,p[1]-g,p[2]-b),0)/px.length;
+  return {r,g,b,dev,light:(r+g+b)/3};
+}
+function cutOut(canvas){
+  const N=canvas.width, x=canvas.getContext("2d",{willReadFrequently:true});
+  const im=x.getImageData(0,0,N,N), d=im.data, e=edgeInfo(d,N);
+  if(!e) return false;
+  const tol=Math.max(22,Math.min(48,e.dev*2.2+18));
+  const dist=i=>Math.hypot(d[i]-e.r,d[i+1]-e.g,d[i+2]-e.b);
+  const seen=new Uint8Array(N*N), q=new Int32Array(N*N); let h=0,t=0;
+  const push=p=>{ if(seen[p]) return; const i=p*4; if(d[i+3]<10||dist(i)<tol){ seen[p]=1; q[t++]=p } };
+  for(let k=0;k<N;k++){ push(k); push((N-1)*N+k); push(k*N); push(k*N+N-1) }
+  while(h<t){ const p=q[h++], px=p%N, py=(p-px)/N;
+    if(px>0) push(p-1); if(px<N-1) push(p+1); if(py>0) push(p-N); if(py<N-1) push(p+N) }
+  if(t>N*N*.97) return false;   // it ate everything: not a plain background
+  for(let p=0;p<N*N;p++) if(seen[p]) d[p*4+3]=0;
+  // soften: pixels next to the cut that are close to the background colour fade out
+  for(let p=0;p<N*N;p++){
+    if(seen[p]) continue; const px=p%N;
+    const edge=(px>0&&seen[p-1])||(px<N-1&&seen[p+1])||(p>=N&&seen[p-N])||(p<N*N-N&&seen[p+N]);
+    if(!edge) continue; const i=p*4, dd=dist(i);
+    d[i+3]=Math.min(d[i+3],Math.round(255*Math.min(1,Math.max(.25,(dd-tol*.5)/(tol*1.5)))));
+  }
+  x.putImageData(im,0,0); return true;
+}
+// after a cut-out: trim the empty space and sit the Jelly at the bottom of the square,
+// filling it, so it stands on the shelf and looks the same size as everything else
+function seat(canvas){
+  const N=canvas.width, x=canvas.getContext("2d",{willReadFrequently:true}), d=x.getImageData(0,0,N,N).data;
+  let x0=N,y0=N,x1=-1,y1=-1;
+  for(let y=0;y<N;y++) for(let xx=0;xx<N;xx++) if(d[(y*N+xx)*4+3]>16){ if(xx<x0)x0=xx; if(xx>x1)x1=xx; if(y<y0)y0=y; if(y>y1)y1=y }
+  if(x1<0) return canvas;
+  const bw=x1-x0+1, bh=y1-y0+1, pad=Math.round(N*.04), s=Math.min((N-pad*2)/bw,(N-pad*2)/bh);
+  const out=document.createElement("canvas"); out.width=N; out.height=N;
+  const o=out.getContext("2d"); o.imageSmoothingQuality="high";
+  o.drawImage(canvas,x0,y0,bw,bh,(N-bw*s)/2,N-pad-bh*s,bw*s,bh*s);
+  return out;
+}
+const looksCuttable=canvas=>{ const N=canvas.width, e=edgeInfo(canvas.getContext("2d",{willReadFrequently:true}).getImageData(0,0,N,N).data,N); return !!e&&e.dev<14&&e.light>200 };
+
+/* ---------- photo framing ----------
+   Starts with the whole photo showing (nothing cut off); pinch to zoom in,
+   drag to move. Optionally cuts out a plain background to a transparent PNG. */
 function cropPhoto(file){
   return new Promise(async(resolve,reject)=>{
     const url=URL.createObjectURL(file);
     let img; try{ img=await loadImg(url) }catch(e){ URL.revokeObjectURL(url); return reject(e) }
-    // work from a copy no bigger than 2000px so older phones cope
     const k=Math.min(1,2000/Math.max(img.naturalWidth,img.naturalHeight));
     const src=document.createElement("canvas"); src.width=Math.round(img.naturalWidth*k); src.height=Math.round(img.naturalHeight*k);
     src.getContext("2d").drawImage(img,0,0,src.width,src.height); URL.revokeObjectURL(url);
-    const ov=$("#crop"), vp=$("#cropVp"), el=$("#cropImg");
-    el.src=src.toDataURL("image/jpeg",.9);
+    const ov=$("#crop"), vp=$("#cropVp"), el=$("#cropImg"), pv=$("#cropPreview"), cutBtn=$("#cropCut");
+    el.src=src.toDataURL("image/png");
     ov.classList.add("open"); ov.setAttribute("aria-hidden","false"); lockBody();
     await new Promise(r=>requestAnimationFrame(r));
-    const V=vp.clientWidth, W=src.width, H=src.height, minS=V/Math.min(W,H);
-    let sc=minS, x=(V-W*sc)/2, y=(V-H*sc)/2;
-    const clamp=()=>{ sc=Math.max(minS,Math.min(minS*5,sc)); x=Math.min(0,Math.max(V-W*sc,x)); y=Math.min(0,Math.max(V-H*sc,y)) };
-    const paint=()=>{ el.style.width=W+"px"; el.style.height=H+"px"; el.style.transform=`translate(${x}px,${y}px) scale(${sc})` };
-    const zoomAt=(f,cx,cy)=>{ const ns=Math.max(minS,Math.min(minS*5,sc*f)), r=ns/sc; x=cx-(cx-x)*r; y=cy-(cy-y)*r; sc=ns; clamp(); paint() };
+    const V=vp.clientWidth, W=src.width, H=src.height;
+    const fitS=V/Math.max(W,H), fillS=V/Math.min(W,H), maxS=fillS*5;
+    let sc=fitS, x=(V-W*sc)/2, y=(V-H*sc)/2;
+    const clampAxis=(pos,size)=>size<=V?(V-size)/2:Math.min(0,Math.max(V-size,pos));
+    const clamp=()=>{ sc=Math.max(fitS,Math.min(maxS,sc)); x=clampAxis(x,W*sc); y=clampAxis(y,H*sc) };
+    // the square as it will be saved (1000px), drawn from the current framing
+    const render=(N)=>{ const c=document.createElement("canvas"); c.width=N; c.height=N; c.getContext("2d").drawImage(src,-x/sc*(1),-y/sc*(1),V/sc,V/sc,0,0,N,N); return c };
+    let cut=false, pvT=null;
+    const paintPreview=()=>{ clearTimeout(pvT); pvT=setTimeout(()=>{ if(!cut) return; const c=render(360); cutOut(c); pv.width=360; pv.height=360; pv.getContext("2d").clearRect(0,0,360,360); pv.getContext("2d").drawImage(c,0,0) },60) };
+    const paint=()=>{ el.style.width=W+"px"; el.style.height=H+"px"; el.style.transform=`translate(${x}px,${y}px) scale(${sc})`; if(cut) paintPreview() };
+    const zoomAt=(f,cx,cy)=>{ const ns=Math.max(fitS,Math.min(maxS,sc*f)), r=ns/sc; x=cx-(cx-x)*r; y=cy-(cy-y)*r; sc=ns; clamp(); paint() };
+    const setCut=on=>{ cut=on; cutBtn.setAttribute("aria-pressed",on); vp.classList.toggle("cutting",on); if(on) paintPreview() };
     clamp(); paint();
+    setCut(looksCuttable(render(200)));   // plain light background: cut it out by default
+    cutBtn.onclick=()=>setCut(!cut);
     const pts=new Map(); let last=null;
     const rel=e=>{ const b=vp.getBoundingClientRect(); return {x:e.clientX-b.left,y:e.clientY-b.top} };
     const gesture=()=>{ const p=[...pts.values()]; if(p.length===1) return {x:p[0].x,y:p[0].y,d:0}; return {x:(p[0].x+p[1].x)/2,y:(p[0].y+p[1].y)/2,d:Math.hypot(p[0].x-p[1].x,p[0].y-p[1].y)} };
@@ -1679,13 +1762,18 @@ function cropPhoto(file){
       if(last){ x+=g.x-last.x; y+=g.y-last.y; if(g.d&&last.d){ zoomAt(g.d/last.d,g.x,g.y) } else { clamp(); paint() } } last=g };
     vp.onpointerup=vp.onpointercancel=e=>{ pts.delete(e.pointerId); last=pts.size?gesture():null };
     vp.onwheel=e=>{ e.preventDefault(); const p=rel(e); zoomAt(e.deltaY<0?1.1:1/1.1,p.x,p.y) };
-    const done=out=>{ ov.classList.remove("open"); ov.setAttribute("aria-hidden","true"); unlockBody(); vp.onpointerdown=vp.onpointermove=vp.onpointerup=vp.onpointercancel=vp.onwheel=null; el.removeAttribute("src"); resolve(out) };
+    const done=out=>{ clearTimeout(pvT); ov.classList.remove("open"); ov.setAttribute("aria-hidden","true"); unlockBody(); setCut(false); vp.onpointerdown=vp.onpointermove=vp.onpointerup=vp.onpointercancel=vp.onwheel=null; cutBtn.onclick=null; el.removeAttribute("src"); resolve(out) };
     $("#cropCancel").onclick=()=>done(null);
     $("#cropUse").onclick=async()=>{
-      const N=1000, c=document.createElement("canvas"); c.width=N; c.height=N;
-      c.getContext("2d").drawImage(src,-x/sc,-y/sc,V/sc,V/sc,0,0,N,N);
-      const blob=await new Promise(r=>c.toBlob(r,"image/jpeg",.82));
-      done({blob,tint:sampleTint(c)});
+      busy(true,"Saving the photo");
+      let c=render(1000);
+      const didCut=cut?cutOut(c):false;
+      if(didCut) c=seat(c);
+      // any empty edges or a cut-out need transparency, so save as PNG; otherwise JPEG is smaller
+      const padded=W*sc<V-1||H*sc<V-1;
+      const blob=await new Promise(r=>c.toBlob(r,didCut||padded?"image/png":"image/jpeg",.84));
+      busy(false);
+      done({blob,tint:sampleTint(c),cutout:didCut});
     };
   });
 }
